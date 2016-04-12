@@ -74,6 +74,25 @@
 
 	Utils.inherits(MovingObject, Asteroid);
 
+	// Asteroid.thumbnail = new Image(); TODO: sprites
+	// Asteroid.thumbnail.src = '../resources/puffy_edit.jpg';
+
+	Asteroid.prototype.draw = function(ctx){
+	  ctx.fillStyle = this.color;
+	  ctx.beginPath();
+
+	  ctx.arc(
+	    this.pos[0],
+	    this.pos[1],
+	    this.radius,
+	    0,
+	    2 * Math.PI,
+	    false
+	  );
+
+	  ctx.fill();
+	};
+
 	Asteroid.COLOR = "#222222";
 	Asteroid.RADIUS = 20;
 	Asteroid.MAX_VEL = 10;
@@ -249,15 +268,6 @@
 	  this.allObjects.push(object);
 	};
 
-	// Game.prototype.obliterate = function(object){
-	//   if (object instanceof Asteroid){
-	//     this.asteroids.push(object);
-	//   } else if(object instanceof Bullet){
-	//     this.bullets.push(object);
-	//   }
-	//   this.allObjects.push(object);
-	// };
-
 	Game.prototype.randomPosition = function(){
 	  var X = Math.random() * Game.DIM_X;
 	  var Y = Math.random() * Game.DIM_Y;
@@ -330,10 +340,10 @@
 	  this.game = new Game();
 	  this.game.addAsteroids();
 	  this.background = new Image();
+	  this.background.src = 'resources/lava.jpg';
 	  this.background.onload = function () {
 	    this.ctx.drawImage(this.background, 0, 0);
 	  }.bind(this);
-	  this.background.src = './lava.jpg';
 	};
 
 	GameView.prototype.start = function(){
