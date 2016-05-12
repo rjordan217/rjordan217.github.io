@@ -3,10 +3,10 @@ var key = require("../keymaster-master/keymaster");
 
 var GameView = function(canvasEl) {
   this.ctx = canvasEl.getContext("2d");
-  this.game = new Game();
+  this.game = new Game(this.ctx);
   this.game.addAsteroids();
   this.background = new Image();
-  this.background.src = 'resources/lava.jpg';
+  this.background.src = './AsteroidsProject/resources/lava.jpg';
   this.background.onload = function () {
     this.ctx.drawImage(this.background, 0, 0);
   }.bind(this);

@@ -44,207 +44,70 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// var Asteroid = require('./asteroid');
-	// var Bullet = require('./bullet');
-	// var Game = require('./game');
-	var GameView = __webpack_require__(6);
-	// var MovingObject = require('./movingObject');
-	// // var Ship = require('./ship');
-	// var Utils = require('./utils');
+	var GameView = __webpack_require__(1);
 
-	window.GameView = GameView;
+	var canvasEl = document.getElementById("asteroids-canvas");
+	var ctx = canvasEl.getContext('2d');
+	ctx.font = "30px Arial";
+	ctx.fillText("Start Fishteroids", canvasEl.width / 2 - 125,canvasEl.height / 2 - 15);
+	canvasEl.addEventListener("click", function() {
+	  var nouveau = new GameView(canvasEl);
+	  nouveau.bindKeyHandlers();
+	  nouveau.start();
+	});
 
 
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Utils = __webpack_require__(2);
-	var MovingObject = __webpack_require__(3);
-	var Game = __webpack_require__(5);
+	var Game = __webpack_require__(2);
+	var key = __webpack_require__(8);
 
-	var Asteroid = function(pos, game) {
-	  var hash = {'pos': pos};
-	  hash['color'] = Asteroid.COLOR;
-	  hash['radius'] = Asteroid.RADIUS;
-	  hash['vel'] = Utils.randomVec(Asteroid.MAX_VEL * Math.random());
-	  hash['game'] = game;
-	  MovingObject.call(this, hash);
+	var GameView = function(canvasEl) {
+	  this.ctx = canvasEl.getContext("2d");
+	  this.game = new Game(this.ctx);
+	  this.game.addAsteroids();
+	  this.background = new Image();
+	  this.background.src = './AsteroidsProject/resources/lava.jpg';
+	  this.background.onload = function () {
+	    this.ctx.drawImage(this.background, 0, 0);
+	  }.bind(this);
 	};
 
-	Utils.inherits(MovingObject, Asteroid);
-
-	// Asteroid.thumbnail = new Image(); TODO: sprites
-	// Asteroid.thumbnail.src = '../resources/puffy_edit.jpg';
-
-	Asteroid.prototype.draw = function(ctx){
-	  ctx.fillStyle = this.color;
-	  ctx.beginPath();
-
-	  ctx.arc(
-	    this.pos[0],
-	    this.pos[1],
-	    this.radius,
-	    0,
-	    2 * Math.PI,
-	    false
-	  );
-
-	  ctx.fill();
+	GameView.prototype.start = function(){
+	  setInterval(function() {
+	    this.game.step();
+	    this.game.draw(this.ctx, this.background);
+	  }.bind(this),20);
 	};
 
-	Asteroid.COLOR = "#222222";
-	Asteroid.RADIUS = 20;
-	Asteroid.MAX_VEL = 10;
+	GameView.prototype.bindKeyHandlers = function(){
+	  key('w', function(){ this.ship.power([0,-1]); }.bind(this.game));
+	  key('a', function(){ this.ship.power([-1,0]); }.bind(this.game));
+	  key('s', function(){ this.ship.power([0,1]); }.bind(this.game));
+	  key('d', function(){ this.ship.power([1,0]); }.bind(this.game));
+	  key('space', function(){ this.ship.fireBullet(); }.bind(this.game));
+	};
 
-
-	module.exports = Asteroid;
+	module.exports = GameView;
 
 
 /***/ },
 /* 2 */
-/***/ function(module, exports) {
-
-	var Utils = {};
-
-	Utils.inherits = function(Parent, Child) {
-	  function Surrogate() {}
-	  Surrogate.prototype = Parent.prototype;
-	  Child.prototype = new Surrogate();
-	  Child.prototype.constructor = Child;
-	};
-
-	Utils.randomVec = function(length) {
-	  var vector = [0,0];
-	  var negOrPosX = (Math.random() < .5 ? -1 : 1);
-	  var negOrPosY = (Math.random() < .5 ? -1 : 1);
-	  var xUnit = Math.random();
-	  var yUnit = Math.sqrt(1 - xUnit * xUnit);
-	  vector[0] = negOrPosX * xUnit * length;
-	  vector[1] = negOrPosY * yUnit * length;
-	  return vector;
-	};
-
-	module.exports = Utils;
-
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	var MovingObject = function(hash){
-	  this.pos = hash['pos'];
-	  this.vel = hash['vel'];
-	  this.radius = hash['radius'];
-	  this.color = hash['color'];
-	  this.game = hash['game'];
-	};
-
-	MovingObject.prototype.draw = function(ctx){
-	  ctx.fillStyle = this.color;
-	  ctx.beginPath();
-
-	  ctx.arc(
-	    this.pos[0],
-	    this.pos[1],
-	    this.radius,
-	    0,
-	    2 * Math.PI,
-	    false
-	  );
-
-	  ctx.fill();
-	};
-
-	MovingObject.prototype.move = function(){
-	  var x = this.pos[0];
-	  var y = this.pos[1];
-	  var delX = this.vel[0];
-	  var delY = this.vel[1];
-	  this.pos[0] = x + delX;
-	  this.pos[1] = y + delY;
-	  var wrapped = this.game.wrap(this.pos);
-
-	  this.pos[0] = ((this.pos[0] > this.game.constructor.DIM_X ||
-	    this.pos[0] < 0) ? wrapped[0] : this.pos[0]);
-	  this.pos[1] = ((this.pos[1] > this.game.constructor.DIM_Y ||
-	    this.pos[1] < 0) ? wrapped[1] : this.pos[1]);
-	};
-
-	MovingObject.prototype.isCollidedWith = function(otherObject){
-	  var myRadius = this.radius;
-	  var theirRadius = otherObject.radius;
-	  var distance = function(pos1, pos2){
-	    var x1 = pos1[0];
-	    var x2 = pos2[0];
-	    var y1 = pos1[1];
-	    var y2 = pos2[1];
-
-	    return Math.sqrt((x2 - x1)*(x2-x1) + (y2 - y1)*(y2-y1));
-	  };
-	  return (distance(this.pos, otherObject.pos) <= myRadius + theirRadius);
-	};
-
-	module.exports = MovingObject;
-
-
-/***/ },
-/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Utils = __webpack_require__(2);
-	var MovingObject = __webpack_require__(3);
-	var Game = __webpack_require__(5);
-
-	var Bullet = function(pos, vel, game) {
-	  var hash = {
-	    'pos': [pos[0],pos[1]],
-	    'game': game
-	  };
-	  if (vel[0] === 0 && vel[1] === 0) {
-	    hash['vel'] = Utils.randomVec(1.2);
-	  } else {
-	    hash['vel'] = [vel[0] * 1.2,vel[1] * 1.2];
-	  }
-	  hash['color'] = Bullet.COLOR;
-	  hash['radius'] = Bullet.RADIUS;
-	  MovingObject.call(this, hash);
-	  game.add(this);
-	};
-
-	Utils.inherits(MovingObject, Bullet);
-
-	Bullet.prototype.move = function() {
-	  var x = this.pos[0];
-	  var y = this.pos[1];
-	  var delX = this.vel[0];
-	  var delY = this.vel[1];
-	  this.pos[0] = x + delX;
-	  this.pos[1] = y + delY;
-	};
-
-	Bullet.COLOR = "#FF0000";
-	Bullet.RADIUS = 5;
+	var Asteroid = __webpack_require__(3);
+	var Ship = __webpack_require__(6);
+	var Bullet = __webpack_require__(7);
 
 
-
-	module.exports = Bullet;
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Asteroid = __webpack_require__(1);
-	var Ship = __webpack_require__(7);
-	var Bullet = __webpack_require__(4);
-
-
-	var Game = function(){
+	var Game = function(ctx){
 	  this.asteroids = [];
 	  this.bullets = [];
 	  this.ship = new Ship(this.randomPosition(), this);
 	  this.allObjects = [this.ship];
+	  this.ctx = ctx;
 	};
 
 	Game.DIM_X = 800;
@@ -329,48 +192,157 @@
 
 
 /***/ },
-/* 6 */
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Game = __webpack_require__(5);
-	var key = __webpack_require__(8);
+	var Utils = __webpack_require__(4);
+	var MovingObject = __webpack_require__(5);
+	var Game = __webpack_require__(2);
 
-	var GameView = function(canvasEl) {
-	  this.ctx = canvasEl.getContext("2d");
-	  this.game = new Game();
-	  this.game.addAsteroids();
-	  this.background = new Image();
-	  this.background.src = 'resources/lava.jpg';
-	  this.background.onload = function () {
-	    this.ctx.drawImage(this.background, 0, 0);
+	var Asteroid = function(pos, game) {
+	  var hash = {'pos': pos};
+	  hash['color'] = Asteroid.COLOR;
+	  hash['radius'] = Asteroid.RADIUS;
+	  hash['vel'] = Utils.randomVec(Asteroid.MAX_VEL * Math.random());
+	  hash['game'] = game;
+	  this.thumbnail = new Image(40,40);
+	  this.thumbnail.src = './AsteroidsProject/resources/puffy_edit.png';
+	  this.imgLoaded = false;
+	  this.thumbnail.onload = function() {
+	    console.log("Loaded");
+	    this.imgLoaded = true;
 	  }.bind(this);
+	  MovingObject.call(this, hash);
 	};
 
-	GameView.prototype.start = function(){
-	  setInterval(function() {
-	    this.game.step();
-	    this.game.draw(this.ctx, this.background);
-	  }.bind(this),20);
+	Utils.inherits(MovingObject, Asteroid);
+
+	// Asteroid.thumbnail = new Image(); TODO: sprites
+	// Asteroid.thumbnail.src = '../resources/puffy_edit.jpg';
+
+
+	Asteroid.prototype.draw = function(ctx){
+	  if (this.imgLoaded) {
+	    ctx.drawImage(this.thumbnail, this.pos[0] - 60, this.pos[1] - 60);
+	  } else {
+	    ctx.fillStyle = this.forFill;
+	    ctx.beginPath();
+
+	    ctx.arc(
+	      this.pos[0],
+	      this.pos[1],
+	      this.radius,
+	      0,
+	      2 * Math.PI,
+	      false
+	    );
+
+	    ctx.fill();
+	  }
 	};
 
-	GameView.prototype.bindKeyHandlers = function(){
-	  key('w', function(){ this.ship.power([0,-1]); }.bind(this.game));
-	  key('a', function(){ this.ship.power([-1,0]); }.bind(this.game));
-	  key('s', function(){ this.ship.power([0,1]); }.bind(this.game));
-	  key('d', function(){ this.ship.power([1,0]); }.bind(this.game));
-	  key('space', function(){ this.ship.fireBullet(); }.bind(this.game));
-	};
+	Asteroid.COLOR = "#222222";
+	Asteroid.RADIUS = 60;
+	Asteroid.MAX_VEL = 10;
 
-	module.exports = GameView;
+
+	module.exports = Asteroid;
 
 
 /***/ },
-/* 7 */
+/* 4 */
+/***/ function(module, exports) {
+
+	var Utils = {};
+
+	Utils.inherits = function(Parent, Child) {
+	  function Surrogate() {}
+	  Surrogate.prototype = Parent.prototype;
+	  Child.prototype = new Surrogate();
+	  Child.prototype.constructor = Child;
+	};
+
+	Utils.randomVec = function(length) {
+	  var vector = [0,0];
+	  var negOrPosX = (Math.random() < .5 ? -1 : 1);
+	  var negOrPosY = (Math.random() < .5 ? -1 : 1);
+	  var xUnit = Math.random();
+	  var yUnit = Math.sqrt(1 - xUnit * xUnit);
+	  vector[0] = negOrPosX * xUnit * length;
+	  vector[1] = negOrPosY * yUnit * length;
+	  return vector;
+	};
+
+	module.exports = Utils;
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	var MovingObject = function(hash){
+	  this.pos = hash['pos'];
+	  this.vel = hash['vel'];
+	  this.radius = hash['radius'];
+	  this.color = hash['color'];
+	  this.game = hash['game'];
+	};
+
+	MovingObject.prototype.draw = function(ctx){
+	  ctx.fillStyle = this.color;
+	  ctx.beginPath();
+
+	  ctx.arc(
+	    this.pos[0],
+	    this.pos[1],
+	    this.radius,
+	    0,
+	    2 * Math.PI,
+	    false
+	  );
+
+	  ctx.fill();
+	};
+
+	MovingObject.prototype.move = function(){
+	  var x = this.pos[0];
+	  var y = this.pos[1];
+	  var delX = this.vel[0];
+	  var delY = this.vel[1];
+	  this.pos[0] = x + delX;
+	  this.pos[1] = y + delY;
+	  var wrapped = this.game.wrap(this.pos);
+
+	  this.pos[0] = ((this.pos[0] > this.game.constructor.DIM_X ||
+	    this.pos[0] < 0) ? wrapped[0] : this.pos[0]);
+	  this.pos[1] = ((this.pos[1] > this.game.constructor.DIM_Y ||
+	    this.pos[1] < 0) ? wrapped[1] : this.pos[1]);
+	};
+
+	MovingObject.prototype.isCollidedWith = function(otherObject){
+	  var myRadius = this.radius;
+	  var theirRadius = otherObject.radius;
+	  var distance = function(pos1, pos2){
+	    var x1 = pos1[0];
+	    var x2 = pos2[0];
+	    var y1 = pos1[1];
+	    var y2 = pos2[1];
+
+	    return Math.sqrt((x2 - x1)*(x2-x1) + (y2 - y1)*(y2-y1));
+	  };
+	  return (distance(this.pos, otherObject.pos) <= myRadius + theirRadius);
+	};
+
+	module.exports = MovingObject;
+
+
+/***/ },
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Utils = __webpack_require__(2);
-	var MovingObject = __webpack_require__(3);
-	var Bullet = __webpack_require__(4);
+	var Utils = __webpack_require__(4);
+	var MovingObject = __webpack_require__(5);
+	var Bullet = __webpack_require__(7);
 	// var Game = require("./game");
 
 	var Ship = function(pos, game) {
@@ -404,6 +376,49 @@
 
 
 	module.exports = Ship;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Utils = __webpack_require__(4);
+	var MovingObject = __webpack_require__(5);
+	var Game = __webpack_require__(2);
+
+	var Bullet = function(pos, vel, game) {
+	  var hash = {
+	    'pos': [pos[0],pos[1]],
+	    'game': game
+	  };
+	  if (vel[0] === 0 && vel[1] === 0) {
+	    hash['vel'] = Utils.randomVec(1.2);
+	  } else {
+	    hash['vel'] = [vel[0] * 1.2,vel[1] * 1.2];
+	  }
+	  hash['color'] = Bullet.COLOR;
+	  hash['radius'] = Bullet.RADIUS;
+	  MovingObject.call(this, hash);
+	  game.add(this);
+	};
+
+	Utils.inherits(MovingObject, Bullet);
+
+	Bullet.prototype.move = function() {
+	  var x = this.pos[0];
+	  var y = this.pos[1];
+	  var delX = this.vel[0];
+	  var delY = this.vel[1];
+	  this.pos[0] = x + delX;
+	  this.pos[1] = y + delY;
+	};
+
+	Bullet.COLOR = "#FF0000";
+	Bullet.RADIUS = 5;
+
+
+
+	module.exports = Bullet;
 
 
 /***/ },

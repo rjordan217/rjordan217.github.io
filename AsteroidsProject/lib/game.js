@@ -3,11 +3,12 @@ var Ship = require("./ship");
 var Bullet = require("./bullet");
 
 
-var Game = function(){
+var Game = function(ctx){
   this.asteroids = [];
   this.bullets = [];
   this.ship = new Ship(this.randomPosition(), this);
   this.allObjects = [this.ship];
+  this.ctx = ctx;
 };
 
 Game.DIM_X = 800;
