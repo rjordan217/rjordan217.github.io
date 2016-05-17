@@ -11,7 +11,7 @@ var Ball = function(options) {
   this.radius = BALL_RADIUS;
   this.vel = [0, 0];
   this.collidedWith = [];
-  // this.game = options.game;
+  this.textOffset = BALL_RADIUS / 3;
 };
 
 Utils.implementsModule(Ball, Collidable);
@@ -63,6 +63,7 @@ Ball.prototype.sink = function (hole) {
   // }
 };
 
+
 Ball.prototype.draw = function (ctx) {
   ctx.fillStyle = this.color;
   ctx.beginPath();
@@ -77,6 +78,57 @@ Ball.prototype.draw = function (ctx) {
   );
 
   ctx.fill();
+
+  if(this.number) {
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+
+    ctx.arc(
+      this.pos[0],
+      this.pos[1],
+      this.radius / 2,
+      0,
+      2 * Math.PI,
+      false
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle = "#000000";
+    ctx.fillText(
+      this.number,
+      this.pos[0] - 3.5,
+      this.pos[1] + 4.5
+    );
+
+    if(this.number > 8) {
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+
+      ctx.arc(
+        this.pos[0],
+        this.pos[1],
+        this.radius,
+        -Math.PI / 3,
+        Math.PI / 3,
+        false
+      );
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(
+        this.pos[0],
+        this.pos[1],
+        this.radius,
+        2 * Math.PI / 3,
+        4 * Math.PI / 3,
+        false
+      );
+
+      ctx.fill();
+    }
+  }
+
 };
 
 module.exports = Ball;

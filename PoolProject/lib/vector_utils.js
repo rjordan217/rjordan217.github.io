@@ -9,16 +9,7 @@ var VectorUtils = {
   },
 
   directionOf: function(vector) {
-    if (vector[0] !== 0) {
-      var theta = Math.atan2(vector[1],vector[0]);
-      return theta;
-    } else {
-      if(vector[1] > 0) {
-        return Math.PI / 2;
-      } else {
-        return - Math.PI / 2;
-      }
-    }
+      return Math.atan2(vector[1],vector[0]);
   },
 
   magnitudeOf: function(vector) {
@@ -26,7 +17,7 @@ var VectorUtils = {
   },
 
   radialOf: function(v1,v2) {
-    return [ v2[0] - v1[0], v2[1] - v2[1] ];
+    return [ v2[0] - v1[0], v2[1] - v1[1] ];
   },
 
   vectorSum: function(v1,v2) {

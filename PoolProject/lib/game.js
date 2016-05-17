@@ -1,4 +1,5 @@
 var Patterns = require('./patterns'),
+    Player = require('./player'),
     Hole = require('./hole'),
     Ball = require('./ball'),
     Cuestick = require('./cuestick');
@@ -7,10 +8,11 @@ TOP_LEFT = [DIM_X / 2 - REL_DIM, (DIM_Y - REL_DIM) / 2];
 BOTTOM_RIGHT = [DIM_X / 2 + REL_DIM, (DIM_Y + REL_DIM) / 2];
 BALL_RADIUS = REL_DIM * .04222;
 
-var BallConstants = require('./ball_constants');
+var BallConstants = require('./ball_constants').NineBall;
 
 var Game = function(ctx) {
   this.ctx = ctx;
+  this.ctx.font = "" + (2 * BALL_RADIUS / 3) + "px Arial";
 
   this.ballArray = [];
   BallConstants.map(function(ballConstant) {
@@ -32,24 +34,30 @@ var Game = function(ctx) {
 
   this.sunkBalls = [];
 
+  this.players = [ new Player(1,"Fred",this), new Player(2,"George",this) ];
+  this.currentPlayer = 0;
+
   this.patterns = new Patterns(ctx,this.startTurn.bind(this));
+
+  this.cuestick = new Cuestick(this.cueball);
+  this.cuestick.bindKeys(this.drawTable.bind(this), this.runTurn.bind(this));
+  this.startTurn();
 };
 
 Game.prototype.startTurn = function () {
-  this.cuestick = new Cuestick(this.cueball);
-  this.bindKeyHandlers();
+  this.cuestick.updateCueball(this.cueball);
   this.drawTable();
 };
 
 Game.prototype.runTurn = function () {
-  this.unbindKeys();
-
   var anyAreMobile = 1;
   var self = this;
+  var samePlayer = this.currentPlayer;
   var drawTable = this.drawTable.bind(this);
   var toClear;
   function callback() {
     cancelAnimationFrame(toClear);
+    self.currentPlayer = (self.currentPlayer + 1) % 2;
     var ballArray = self.ballArray;
     var holeArray = self.holeArray;
     if (anyAreMobile) {
@@ -66,23 +74,25 @@ Game.prototype.runTurn = function () {
         ball.ensurePointCollision(ballArray);
       });
       var offset = 0;
+      var playsAgain = true;
       sunkArray.forEach(function(ballObj) {
-        self.ballArray.splice(ballObj.index - offset, 1);
-        ballArray = self.ballArray;
         if(ballObj.index === 0) {
-          self.cueball = new Ball(
-            {number: 0,pos: [ DIM_X / 2 + REL_DIM / 2, DIM_Y / 2 ],color: '#ffffff'}
-          );
-          self.ballArray.unshift(self.cueball);
+          self.cueball.pos = [ DIM_X / 2 + REL_DIM / 2, DIM_Y / 2 ];
+          self.cueball.isSunk = false;
+          self.currentPlayer = (self.currentPlayer + 1) % 2;
+          playsAgain = false;
         } else {
+          self.ballArray.splice(ballObj.index - offset, 1);
           self.sunkBalls.push(ballObj.ball);
+          self.players[samePlayer].sinkBall(ballObj.ball);
+          if(playsAgain) self.currentPlayer = samePlayer;
           offset++;
         }
       });
+      self.updateNextTarget();
       toClear = requestAnimationFrame(function() {
         drawTable();
         callback();
-        self.cuestick = null;
       });
     } else {
       toClear = requestAnimationFrame(function() {
@@ -92,6 +102,16 @@ Game.prototype.runTurn = function () {
     }
   }
   toClear = requestAnimationFrame(callback);
+};
+
+Game.prototype.updateNextTarget = function () {
+  this.players[0].updateNextBall(this.ballArray[1].number);
+  this.players[1].updateNextBall(this.ballArray[1].number);
+  console.log(this.ballArray[1].number);
+};
+
+Game.prototype.gameOver = function () {
+  console.log(this.players[this.currentPlayer].nickname + " lost!");
 };
 
 Game.prototype.drawTable = function () {
@@ -115,14 +135,6 @@ Game.prototype.drawTable = function () {
   if(this.cuestick) {
     this.cuestick.draw(ctx);
   }
-};
-
-Game.prototype.bindKeyHandlers = function () {
-  this.cuestick.bindKeys(this.drawTable.bind(this), this.runTurn.bind(this));
-};
-
-Game.prototype.unbindKeys = function () {
-  this.cuestick.unbindKeys();
 };
 
 module.exports = Game;

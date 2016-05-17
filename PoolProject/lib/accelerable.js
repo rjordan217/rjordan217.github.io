@@ -7,12 +7,12 @@ var Accelerable = {
   },
   friction: function() {
     var frictionDir = Math.PI + VectorUtils.directionOf(this.vel);
-    this.vel[0] += .005 * Math.cos(frictionDir);
-    this.vel[1] += .005 * Math.sin(frictionDir);
-    if (Math.abs(this.vel[0]) < .2) {
+    this.vel[0] += .03 * Math.cos(frictionDir);
+    this.vel[1] += .03 * Math.sin(frictionDir);
+    if (Math.abs(this.vel[0]) < .1) {
       this.vel[0] = 0;
     }
-    if (Math.abs(this.vel[1]) < .2) {
+    if (Math.abs(this.vel[1]) < .1) {
       this.vel[1] = 0;
     }
   }

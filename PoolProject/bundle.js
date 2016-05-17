@@ -47,8 +47,11 @@
 	var canvasEl = document.getElementById('pool-canvas');
 	var ctx = canvasEl.getContext('2d');
 	
-	ctx.font = "30px Arial";
-	ctx.fillText("Start Pool", canvasEl.width / 2 - 50,canvasEl.height / 2 - 15);
+	
+	GET_MOUSE_POS = function(e) {
+	    var rect = canvasEl.getBoundingClientRect();
+	    return [ e.clientX - rect.left, e.clientY - rect.top ];
+	};
 	
 	DIM_X = canvasEl.width;
 	DIM_Y = canvasEl.height;
@@ -56,10 +59,7 @@
 	REL_DIM = toSize / 1.2;
 	
 	var Game = __webpack_require__(1);
-	canvasEl.addEventListener("click", function() {
-	  var juego = new Game(ctx);
-	  juego.startTurn();
-	})
+	var juego = new Game(ctx);
 
 
 /***/ },
@@ -67,6 +67,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Patterns = __webpack_require__(2),
+	    Player = __webpack_require__(11),
 	    Hole = __webpack_require__(3),
 	    Ball = __webpack_require__(4),
 	    Cuestick = __webpack_require__(9);
@@ -75,10 +76,11 @@
 	BOTTOM_RIGHT = [DIM_X / 2 + REL_DIM, (DIM_Y + REL_DIM) / 2];
 	BALL_RADIUS = REL_DIM * .04222;
 	
-	var BallConstants = __webpack_require__(10);
+	var BallConstants = __webpack_require__(10).NineBall;
 	
 	var Game = function(ctx) {
 	  this.ctx = ctx;
+	  this.ctx.font = "" + (2 * BALL_RADIUS / 3) + "px Arial";
 	
 	  this.ballArray = [];
 	  BallConstants.map(function(ballConstant) {
@@ -100,24 +102,30 @@
 	
 	  this.sunkBalls = [];
 	
+	  this.players = [ new Player(1,"Fred",this), new Player(2,"George",this) ];
+	  this.currentPlayer = 0;
+	
 	  this.patterns = new Patterns(ctx,this.startTurn.bind(this));
+	
+	  this.cuestick = new Cuestick(this.cueball);
+	  this.cuestick.bindKeys(this.drawTable.bind(this), this.runTurn.bind(this));
+	  this.startTurn();
 	};
 	
 	Game.prototype.startTurn = function () {
-	  this.cuestick = new Cuestick(this.cueball);
-	  this.bindKeyHandlers();
+	  this.cuestick.updateCueball(this.cueball);
 	  this.drawTable();
 	};
 	
 	Game.prototype.runTurn = function () {
-	  this.unbindKeys();
-	
 	  var anyAreMobile = 1;
 	  var self = this;
+	  var samePlayer = this.currentPlayer;
 	  var drawTable = this.drawTable.bind(this);
 	  var toClear;
 	  function callback() {
 	    cancelAnimationFrame(toClear);
+	    self.currentPlayer = (self.currentPlayer + 1) % 2;
 	    var ballArray = self.ballArray;
 	    var holeArray = self.holeArray;
 	    if (anyAreMobile) {
@@ -134,23 +142,25 @@
 	        ball.ensurePointCollision(ballArray);
 	      });
 	      var offset = 0;
+	      var playsAgain = true;
 	      sunkArray.forEach(function(ballObj) {
-	        self.ballArray.splice(ballObj.index - offset, 1);
-	        ballArray = self.ballArray;
 	        if(ballObj.index === 0) {
-	          self.cueball = new Ball(
-	            {number: 0,pos: [ DIM_X / 2 + REL_DIM / 2, DIM_Y / 2 ],color: '#ffffff'}
-	          );
-	          self.ballArray.unshift(self.cueball);
+	          self.cueball.pos = [ DIM_X / 2 + REL_DIM / 2, DIM_Y / 2 ];
+	          self.cueball.isSunk = false;
+	          self.currentPlayer = (self.currentPlayer + 1) % 2;
+	          playsAgain = false;
 	        } else {
+	          self.ballArray.splice(ballObj.index - offset, 1);
 	          self.sunkBalls.push(ballObj.ball);
+	          self.players[samePlayer].sinkBall(ballObj.ball);
+	          if(playsAgain) self.currentPlayer = samePlayer;
 	          offset++;
 	        }
 	      });
+	      self.updateNextTarget();
 	      toClear = requestAnimationFrame(function() {
 	        drawTable();
 	        callback();
-	        self.cuestick = null;
 	      });
 	    } else {
 	      toClear = requestAnimationFrame(function() {
@@ -160,6 +170,16 @@
 	    }
 	  }
 	  toClear = requestAnimationFrame(callback);
+	};
+	
+	Game.prototype.updateNextTarget = function () {
+	  this.players[0].updateNextBall(this.ballArray[1].number);
+	  this.players[1].updateNextBall(this.ballArray[1].number);
+	  console.log(this.ballArray[1].number);
+	};
+	
+	Game.prototype.gameOver = function () {
+	  console.log(this.players[this.currentPlayer].nickname + " lost!");
 	};
 	
 	Game.prototype.drawTable = function () {
@@ -183,14 +203,6 @@
 	  if(this.cuestick) {
 	    this.cuestick.draw(ctx);
 	  }
-	};
-	
-	Game.prototype.bindKeyHandlers = function () {
-	  this.cuestick.bindKeys(this.drawTable.bind(this), this.runTurn.bind(this));
-	};
-	
-	Game.prototype.unbindKeys = function () {
-	  this.cuestick.unbindKeys();
 	};
 	
 	module.exports = Game;
@@ -293,7 +305,7 @@
 	  this.radius = BALL_RADIUS;
 	  this.vel = [0, 0];
 	  this.collidedWith = [];
-	  // this.game = options.game;
+	  this.textOffset = BALL_RADIUS / 3;
 	};
 	
 	Utils.implementsModule(Ball, Collidable);
@@ -345,6 +357,7 @@
 	  // }
 	};
 	
+	
 	Ball.prototype.draw = function (ctx) {
 	  ctx.fillStyle = this.color;
 	  ctx.beginPath();
@@ -359,6 +372,57 @@
 	  );
 	
 	  ctx.fill();
+	
+	  if(this.number) {
+	    ctx.fillStyle = '#ffffff';
+	    ctx.beginPath();
+	
+	    ctx.arc(
+	      this.pos[0],
+	      this.pos[1],
+	      this.radius / 2,
+	      0,
+	      2 * Math.PI,
+	      false
+	    );
+	
+	    ctx.fill();
+	
+	    ctx.fillStyle = "#000000";
+	    ctx.fillText(
+	      this.number,
+	      this.pos[0] - 3.5,
+	      this.pos[1] + 4.5
+	    );
+	
+	    if(this.number > 8) {
+	      ctx.fillStyle = "#ffffff";
+	      ctx.beginPath();
+	
+	      ctx.arc(
+	        this.pos[0],
+	        this.pos[1],
+	        this.radius,
+	        -Math.PI / 3,
+	        Math.PI / 3,
+	        false
+	      );
+	      ctx.fill();
+	
+	      ctx.beginPath();
+	      ctx.arc(
+	        this.pos[0],
+	        this.pos[1],
+	        this.radius,
+	        2 * Math.PI / 3,
+	        4 * Math.PI / 3,
+	        false
+	      );
+	
+	      ctx.fill();
+	    }
+	  }
+	
 	};
 	
 	module.exports = Ball;
@@ -474,7 +538,7 @@
 	  },
 	
 	  isInHole: function(hole) {
-	    if (VectorUtils.distance(this.pos, hole.pos) < hole.radius + this.radius / 2) {
+	    if (VectorUtils.distance(this.pos, hole.pos) < hole.radius) {
 	      return true;
 	    } else {
 	      return false;
@@ -497,10 +561,10 @@
 	    ballArray.forEach(function(otherBall) {
 	      if (this.collidedWithBall(otherBall)) {
 	        var distance = VectorUtils.distance(this.pos, otherBall.pos),
-	        scaledToRad = VectorUtils.scale(this.radius / distance, VectorUtils.radialOf(this.pos, otherBall.pos));
+	        scaledRad = VectorUtils.scale(2 * this.radius / distance, VectorUtils.radialOf(this.pos, otherBall.pos));
 	
-	        this.pos = VectorUtils.vectorSum(this.pos,VectorUtils.negativeOf(scaledToRad));
-	        otherBall.pos = VectorUtils.vectorSum(otherBall.pos,scaledToRad);
+	        this.pos = VectorUtils.vectorSum(otherBall.pos,VectorUtils.negativeOf(scaledRad));
+	        // otherBall.pos = VectorUtils.vectorSum(otherBall.pos,scaledToRad);
 	      }
 	    }.bind(this));
 	  }
@@ -524,16 +588,7 @@
 	  },
 	
 	  directionOf: function(vector) {
-	    if (vector[0] !== 0) {
-	      var theta = Math.atan2(vector[1],vector[0]);
-	      return theta;
-	    } else {
-	      if(vector[1] > 0) {
-	        return Math.PI / 2;
-	      } else {
-	        return - Math.PI / 2;
-	      }
-	    }
+	      return Math.atan2(vector[1],vector[0]);
 	  },
 	
 	  magnitudeOf: function(vector) {
@@ -541,7 +596,7 @@
 	  },
 	
 	  radialOf: function(v1,v2) {
-	    return [ v2[0] - v1[0], v2[1] - v2[1] ];
+	    return [ v2[0] - v1[0], v2[1] - v1[1] ];
 	  },
 	
 	  vectorSum: function(v1,v2) {
@@ -581,12 +636,12 @@
 	  },
 	  friction: function() {
 	    var frictionDir = Math.PI + VectorUtils.directionOf(this.vel);
-	    this.vel[0] += .005 * Math.cos(frictionDir);
-	    this.vel[1] += .005 * Math.sin(frictionDir);
-	    if (Math.abs(this.vel[0]) < .2) {
+	    this.vel[0] += .03 * Math.cos(frictionDir);
+	    this.vel[1] += .03 * Math.sin(frictionDir);
+	    if (Math.abs(this.vel[0]) < .1) {
 	      this.vel[0] = 0;
 	    }
-	    if (Math.abs(this.vel[1]) < .2) {
+	    if (Math.abs(this.vel[1]) < .1) {
 	      this.vel[1] = 0;
 	    }
 	  }
@@ -597,10 +652,12 @@
 
 /***/ },
 /* 9 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
+	var VectorUtils = __webpack_require__(7);
+	
 	var Cuestick = function(cueball) {
-	  this.centeredOn = cueball.pos;
+	  this.centeredOn = cueball.pos.slice();
 	  this.cueball = cueball;
 	  this.angle = 0;
 	  this.drawn = 0;
@@ -613,13 +670,13 @@
 	Cuestick.prototype.drawBack = function (direction) {
 	  if(this.drawn <= 0 && direction === -1) {
 	    this.drawn = 0;
-	  } else {
-	    this.drawn += 4 * direction;
+	  } else if (this.drawn <= 100) {
+	    this.drawn += 1 * direction;
 	  }
 	};
 	
 	Cuestick.prototype.impartMomentum = function (power) {
-	  this.cueball.vel = [ - power / 40 * Math.cos(this.angle), - power / 40 * Math.sin(this.angle) ];
+	  this.cueball.vel = [ - power / 10 * Math.cos(this.angle), - power / 10 * Math.sin(this.angle) ];
 	};
 	
 	Cuestick.prototype.fire = function(renderCB, turnCallback) {
@@ -663,18 +720,55 @@
 	      this.fire(renderCB, turnCB);
 	      break;
 	  }
-	  console.log("Listening");
+	};
+	
+	Cuestick.prototype.clickedBinder = function (renderCB, e) {
+	  e.preventDefault();
+	  this.clickedFunc = setInterval(function() {
+	    this.drawBack(1);
+	    renderCB();
+	  }.bind(this),25)
+	};
+	
+	Cuestick.prototype.unclickedBinder = function (e) {
+	  e.preventDefault();
+	  clearInterval(this.clickedFunc);
+	};
+	
+	Cuestick.prototype.hoverBinder = function (renderCB, e) {
+	  var mousePos = GET_MOUSE_POS(e);
+	  var radial = VectorUtils.radialOf(this.centeredOn, mousePos);
+	  this.angle = VectorUtils.directionOf(radial);
+	  renderCB();
 	};
 	
 	Cuestick.prototype.bindKeys = function (renderCB, turnCB) {
-	  this.toRemove = function(e) {
-	    this.keyBinder(renderCB, turnCB, e);
-	  }.bind(this);
-	  document.addEventListener("keydown", this.toRemove, false);
+	  document.addEventListener(
+	    "keydown",
+	    this.keyBinder.bind(this,renderCB,turnCB),
+	    false
+	  );
+	  document.addEventListener(
+	    "mousedown",
+	    this.clickedBinder.bind(this, renderCB),
+	    false
+	  );
+	  document.addEventListener(
+	    "mouseup",
+	    this.unclickedBinder.bind(this),
+	    false
+	  );
+	  document.addEventListener(
+	    "mousemove",
+	    this.hoverBinder.bind(this, renderCB),
+	    false
+	  );
 	};
 	
-	Cuestick.prototype.unbindKeys = function (renderCB, turnCB) {
-	  document.removeEventListener("keydown", this.toRemove, false);
+	Cuestick.prototype.updateCueball = function (newCueball) {
+	  this.centeredOn = newCueball.pos.slice();
+	  this.cueball = newCueball;
+	  this.drawn = 0;
 	};
 	
 	Cuestick.prototype.draw = function (ctx) {
@@ -697,90 +791,177 @@
 	var Y_BASE = DIM_Y / 2;
 	var DEL_X = BALL_RADIUS * Math.sqrt(3);
 	
-	var BallConstants = [
-	  { // Cueball
-	    number: 0,
-	    pos: [ DIM_X / 2 + REL_DIM / 2, Y_BASE ],
-	    color: '#ffffff'
-	  },
-	  { // 1
-	    number: 1,
-	    pos: [ TIP_OF_TRIANGLE + 4, Y_BASE ],
-	    color: 'yellow'
-	  },
-	  { // 2
-	    number: 2,
-	    pos: [ TIP_OF_TRIANGLE - DEL_X + 3, Y_BASE - BALL_RADIUS ],
-	    color: 'blue'
-	  },
-	  { // 3
-	    number: 3,
-	    pos: [ TIP_OF_TRIANGLE - DEL_X + 3, Y_BASE + BALL_RADIUS ],
-	    color: 'rgb(255,140,60)'
-	  },
-	  { // 4
-	    number: 4,
-	    pos: [ TIP_OF_TRIANGLE - 2 * DEL_X + 2, Y_BASE - 2 * BALL_RADIUS ],
-	    color: 'rgb(255,0,255)'
-	  },
-	  { // 5
-	    number: 5,
-	    pos: [ TIP_OF_TRIANGLE - 2 * DEL_X + 2, Y_BASE ],
-	    color: 'orange'
-	  },
-	  { // 6
-	    number: 6,
-	    pos: [ TIP_OF_TRIANGLE - 2 * DEL_X + 2, Y_BASE + 2 * BALL_RADIUS ],
-	    color: 'rgb(0,200,0)'
-	  },
-	  { // 7
-	    number: 7,
-	    pos: [ TIP_OF_TRIANGLE - 3 * DEL_X + 1, Y_BASE - 3 * BALL_RADIUS ],
-	    color: 'rgb(200,0,0)'
-	  },
-	  { // 8
-	    number: 8,
-	    pos: [ TIP_OF_TRIANGLE - 3 * DEL_X + 1, Y_BASE - BALL_RADIUS ],
-	    color: '#000000'
-	  },
-	  { // 9
-	    number: 9,
-	    pos: [ TIP_OF_TRIANGLE - 3 * DEL_X + 1, Y_BASE + BALL_RADIUS ],
-	    color: 'yellow'
-	  },
-	  { // 10
-	    number: 10,
-	    pos: [ TIP_OF_TRIANGLE - 3 * DEL_X + 1, Y_BASE + 3 * BALL_RADIUS ],
-	    color: 'blue'
-	  },
-	  { // 11
-	    number: 11,
-	    pos: [ TIP_OF_TRIANGLE - 4 * DEL_X, Y_BASE - 4 * BALL_RADIUS ],
-	    color: 'rgb(255,140,60)'
-	  },
-	  { // 12
-	    number: 12,
-	    pos: [ TIP_OF_TRIANGLE - 4 * DEL_X, Y_BASE - 2 * BALL_RADIUS ],
-	    color: 'rgb(255,0,255)'
-	  },
-	  { // 13
-	    number: 13,
-	    pos: [ TIP_OF_TRIANGLE - 4 * DEL_X, Y_BASE ],
-	    color: 'orange'
-	  },
-	  { // 14
-	    number: 14,
-	    pos: [ TIP_OF_TRIANGLE - 4 * DEL_X, Y_BASE + 2 * BALL_RADIUS ],
-	    color: 'rgb(0,200,0)'
-	  },
-	  { // 15
-	    number: 15,
-	    pos: [ TIP_OF_TRIANGLE - 4 * DEL_X, Y_BASE + 4 * BALL_RADIUS ],
-	    color: 'rgb(200,0,0)'
-	  }
-	];
+	var BallConstants = {
+	  FifteenBall: [
+	    { // Cueball
+	      number: 0,
+	      pos: [ DIM_X / 2 + REL_DIM / 2, Y_BASE ],
+	      color: '#ffffff'
+	    },
+	    { // 1
+	      number: 1,
+	      pos: [ TIP_OF_TRIANGLE + 4, Y_BASE ],
+	      color: 'yellow'
+	    },
+	    { // 2
+	      number: 2,
+	      pos: [ TIP_OF_TRIANGLE - DEL_X + 3, Y_BASE - BALL_RADIUS ],
+	      color: 'blue'
+	    },
+	    { // 3
+	      number: 3,
+	      pos: [ TIP_OF_TRIANGLE - DEL_X + 3, Y_BASE + BALL_RADIUS ],
+	      color: 'rgb(255,70,30)'
+	    },
+	    { // 4
+	      number: 4,
+	      pos: [ TIP_OF_TRIANGLE - 2 * DEL_X + 2, Y_BASE - 2 * BALL_RADIUS ],
+	      color: 'rgb(255,0,255)'
+	    },
+	    { // 5
+	      number: 5,
+	      pos: [ TIP_OF_TRIANGLE - 2 * DEL_X + 2, Y_BASE ],
+	      color: 'orange'
+	    },
+	    { // 6
+	      number: 6,
+	      pos: [ TIP_OF_TRIANGLE - 2 * DEL_X + 2, Y_BASE + 2 * BALL_RADIUS ],
+	      color: 'rgb(0,200,0)'
+	    },
+	    { // 7
+	      number: 7,
+	      pos: [ TIP_OF_TRIANGLE - 3 * DEL_X + 1, Y_BASE - 3 * BALL_RADIUS ],
+	      color: 'rgb(200,0,0)'
+	    },
+	    { // 8
+	      number: 8,
+	      pos: [ TIP_OF_TRIANGLE - 3 * DEL_X + 1, Y_BASE - BALL_RADIUS ],
+	      color: '#000000'
+	    },
+	    { // 9
+	      number: 9,
+	      pos: [ TIP_OF_TRIANGLE - 3 * DEL_X + 1, Y_BASE + BALL_RADIUS ],
+	      color: 'yellow'
+	    },
+	    { // 10
+	      number: 10,
+	      pos: [ TIP_OF_TRIANGLE - 3 * DEL_X + 1, Y_BASE + 3 * BALL_RADIUS ],
+	      color: 'blue'
+	    },
+	    { // 11
+	      number: 11,
+	      pos: [ TIP_OF_TRIANGLE - 4 * DEL_X, Y_BASE - 4 * BALL_RADIUS ],
+	      color: 'rgb(255,140,60)'
+	    },
+	    { // 12
+	      number: 12,
+	      pos: [ TIP_OF_TRIANGLE - 4 * DEL_X, Y_BASE - 2 * BALL_RADIUS ],
+	      color: 'rgb(255,0,255)'
+	    },
+	    { // 13
+	      number: 13,
+	      pos: [ TIP_OF_TRIANGLE - 4 * DEL_X, Y_BASE ],
+	      color: 'orange'
+	    },
+	    { // 14
+	      number: 14,
+	      pos: [ TIP_OF_TRIANGLE - 4 * DEL_X, Y_BASE + 2 * BALL_RADIUS ],
+	      color: 'rgb(0,200,0)'
+	    },
+	    { // 15
+	      number: 15,
+	      pos: [ TIP_OF_TRIANGLE - 4 * DEL_X, Y_BASE + 4 * BALL_RADIUS ],
+	      color: 'rgb(200,0,0)'
+	    }
+	  ],
+	  NineBall: [
+	    { // Cueball
+	      number: 0,
+	      pos: [ DIM_X / 2 + REL_DIM / 2, Y_BASE ],
+	      color: '#ffffff'
+	    },
+	    { // 1
+	      number: 1,
+	      pos: [ TIP_OF_TRIANGLE + 4, Y_BASE ],
+	      color: 'yellow'
+	    },
+	    { // 2
+	      number: 2,
+	      pos: [ TIP_OF_TRIANGLE - DEL_X + 3, Y_BASE - BALL_RADIUS ],
+	      color: 'blue'
+	    },
+	    { // 3
+	      number: 3,
+	      pos: [ TIP_OF_TRIANGLE - DEL_X + 3, Y_BASE + BALL_RADIUS ],
+	      color: 'rgb(255,70,30)'
+	    },
+	    { // 4
+	      number: 4,
+	      pos: [ TIP_OF_TRIANGLE - 2 * DEL_X + 2, Y_BASE - 2 * BALL_RADIUS ],
+	      color: 'rgb(255,0,255)'
+	    },
+	    { // 5
+	      number: 5,
+	      pos: [ TIP_OF_TRIANGLE - 2 * DEL_X + 2, Y_BASE + 2 * BALL_RADIUS ],
+	      color: 'orange'
+	    },
+	    { // 6
+	      number: 6,
+	      pos: [ TIP_OF_TRIANGLE - 3 * DEL_X + 1, Y_BASE - BALL_RADIUS ],
+	      color: 'rgb(0,200,0)'
+	    },
+	    { // 7
+	      number: 7,
+	      pos: [ TIP_OF_TRIANGLE - 3 * DEL_X + 1, Y_BASE + BALL_RADIUS ],
+	      color: 'rgb(200,0,0)'
+	    },
+	    { // 8
+	      number: 8,
+	      pos: [ TIP_OF_TRIANGLE - 4 * DEL_X, Y_BASE ],
+	      color: '#000000'
+	    },
+	    { // 9
+	      number: 9,
+	      pos: [ TIP_OF_TRIANGLE - 2 * DEL_X + 2, Y_BASE ],
+	      color: 'yellow'
+	    }
+	  ]
+	};
 	
 	module.exports = BallConstants;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	var Player = function(id, nickname, game) {
+	  this.id = id;
+	  this.nickname = nickname || "Player " + id;
+	  this.nextBallNumber = 1;
+	  this.points = 0;
+	  this.game = game;
+	};
+	
+	Player.prototype.sinkBall = function (ball, gameOverCB) {
+	  if(ball.number === this.nextBall) {
+	    this.points++;
+	    if(ball.number === 9) this.game.gameWon();
+	  } else if (ball.number === 9) {
+	    this.game.gameOver();
+	  }
+	};
+	
+	Player.prototype.updateNextBall = function (nextNumber) {
+	  this.nextBallNumber = nextNumber;
+	};
+	
+	Player.prototype.gameLost = function (gameOverCB) {
+	  this.points = 0;
+	  gameOverCB();
+	};
+	
+	module.exports = Player;
 
 
 /***/ }

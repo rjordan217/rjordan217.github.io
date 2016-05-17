@@ -1,5 +1,7 @@
+var VectorUtils = require('./vector_utils');
+
 var Cuestick = function(cueball) {
-  this.centeredOn = cueball.pos;
+  this.centeredOn = cueball.pos.slice();
   this.cueball = cueball;
   this.angle = 0;
   this.drawn = 0;
@@ -12,13 +14,13 @@ Cuestick.prototype.rotate = function (direction) {
 Cuestick.prototype.drawBack = function (direction) {
   if(this.drawn <= 0 && direction === -1) {
     this.drawn = 0;
-  } else {
-    this.drawn += 4 * direction;
+  } else if (this.drawn <= 100) {
+    this.drawn += 1 * direction;
   }
 };
 
 Cuestick.prototype.impartMomentum = function (power) {
-  this.cueball.vel = [ - power / 40 * Math.cos(this.angle), - power / 40 * Math.sin(this.angle) ];
+  this.cueball.vel = [ - power / 10 * Math.cos(this.angle), - power / 10 * Math.sin(this.angle) ];
 };
 
 Cuestick.prototype.fire = function(renderCB, turnCallback) {
@@ -62,18 +64,55 @@ Cuestick.prototype.keyBinder = function (renderCB, turnCB, e) {
       this.fire(renderCB, turnCB);
       break;
   }
-  console.log("Listening");
+};
+
+Cuestick.prototype.clickedBinder = function (renderCB, e) {
+  e.preventDefault();
+  this.clickedFunc = setInterval(function() {
+    this.drawBack(1);
+    renderCB();
+  }.bind(this),25)
+};
+
+Cuestick.prototype.unclickedBinder = function (e) {
+  e.preventDefault();
+  clearInterval(this.clickedFunc);
+};
+
+Cuestick.prototype.hoverBinder = function (renderCB, e) {
+  var mousePos = GET_MOUSE_POS(e);
+  var radial = VectorUtils.radialOf(this.centeredOn, mousePos);
+  this.angle = VectorUtils.directionOf(radial);
+  renderCB();
 };
 
 Cuestick.prototype.bindKeys = function (renderCB, turnCB) {
-  this.toRemove = function(e) {
-    this.keyBinder(renderCB, turnCB, e);
-  }.bind(this);
-  document.addEventListener("keydown", this.toRemove, false);
+  document.addEventListener(
+    "keydown",
+    this.keyBinder.bind(this,renderCB,turnCB),
+    false
+  );
+  document.addEventListener(
+    "mousedown",
+    this.clickedBinder.bind(this, renderCB),
+    false
+  );
+  document.addEventListener(
+    "mouseup",
+    this.unclickedBinder.bind(this),
+    false
+  );
+  document.addEventListener(
+    "mousemove",
+    this.hoverBinder.bind(this, renderCB),
+    false
+  );
 };
 
-Cuestick.prototype.unbindKeys = function (renderCB, turnCB) {
-  document.removeEventListener("keydown", this.toRemove, false);
+Cuestick.prototype.updateCueball = function (newCueball) {
+  this.centeredOn = newCueball.pos.slice();
+  this.cueball = newCueball;
+  this.drawn = 0;
 };
 
 Cuestick.prototype.draw = function (ctx) {

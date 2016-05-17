@@ -83,7 +83,7 @@ var Collidable = {
   },
 
   isInHole: function(hole) {
-    if (VectorUtils.distance(this.pos, hole.pos) < hole.radius + this.radius / 2) {
+    if (VectorUtils.distance(this.pos, hole.pos) < hole.radius) {
       return true;
     } else {
       return false;
@@ -106,10 +106,10 @@ var Collidable = {
     ballArray.forEach(function(otherBall) {
       if (this.collidedWithBall(otherBall)) {
         var distance = VectorUtils.distance(this.pos, otherBall.pos),
-        scaledToRad = VectorUtils.scale(this.radius / distance, VectorUtils.radialOf(this.pos, otherBall.pos));
+        scaledRad = VectorUtils.scale(2 * this.radius / distance, VectorUtils.radialOf(this.pos, otherBall.pos));
 
-        this.pos = VectorUtils.vectorSum(this.pos,VectorUtils.negativeOf(scaledToRad));
-        otherBall.pos = VectorUtils.vectorSum(otherBall.pos,scaledToRad);
+        this.pos = VectorUtils.vectorSum(otherBall.pos,VectorUtils.negativeOf(scaledRad));
+        // otherBall.pos = VectorUtils.vectorSum(otherBall.pos,scaledToRad);
       }
     }.bind(this));
   }
