@@ -33,13 +33,24 @@ var Game = function(ctx) {
   }.bind(this));
 
   this.sunkBalls = [];
-
-  this.players = [ new Player(1,"Fred",this), new Player(2,"George",this) ];
   this.currentPlayer = 0;
 
-  this.patterns = new Patterns(ctx,this.startTurn.bind(this));
+  this.patterns = new Patterns(ctx,this.drawTable.bind(this));
 
   this.cuestick = new Cuestick(this.cueball);
+};
+
+Game.prototype.addPlayers = function (playerNames) {
+  this.players = [];
+  var playerNumber = 1;
+  playerNames.forEach(function(name) {
+    this.players.push(new Player(playerNumber, name, this));
+    playerNumber++;
+  }.bind(this));
+  console.log(this.players);
+};
+
+Game.prototype.startGame = function () {
   this.cuestick.bindKeys(this.drawTable.bind(this), this.runTurn.bind(this));
   this.startTurn();
 };
@@ -107,7 +118,6 @@ Game.prototype.runTurn = function () {
 Game.prototype.updateNextTarget = function () {
   this.players[0].updateNextBall(this.ballArray[1].number);
   this.players[1].updateNextBall(this.ballArray[1].number);
-  console.log(this.ballArray[1].number);
 };
 
 Game.prototype.gameOver = function () {

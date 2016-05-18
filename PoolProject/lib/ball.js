@@ -34,7 +34,6 @@ Ball.prototype.runCourse = function (ballArray, holeArray) {
     }.bind(this));
     holeArray.forEach(function(hole) {
       if(this.isInHole(hole)) {
-        console.log("Is in hole");
         this.sink(hole);
       }
     }.bind(this));
@@ -54,13 +53,6 @@ Ball.prototype.sink = function (hole) {
   var distancia = VectorUtils.distance(this.pos,hole.pos);
   this.isSunk = true;
   this.vel = [0,0];
-  console.log("SUNK: " + this.number);
-  // if (distancia < 20) {
-  //   console.log("SUNK");
-  // } else {
-  //   var unitVector = VectorUtils.radialOf(this.pos,hole.pos) / distancia;
-  //   this.vel = VectorUtils.scale(10, unitVector);
-  // }
 };
 
 

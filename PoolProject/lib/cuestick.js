@@ -120,6 +120,10 @@ Cuestick.prototype.draw = function (ctx) {
   ctx.rotate(this.angle);
   ctx.fillStyle = '#ffca66';
   ctx.fillRect(50 + this.drawn, -5, REL_DIM * 1.5, 10);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(50 + this.drawn, -5, 25, 10);
+  ctx.fillStyle = '#ff00ff';
+  ctx.fillRect(50 + this.drawn, -5, 5, 10);
   ctx.rotate(-this.angle);
   ctx.translate(-this.centeredOn[0], -this.centeredOn[1]);
 };

@@ -58,8 +58,8 @@
 	var toSize = Math.min(DIM_X / 2, DIM_Y);
 	REL_DIM = toSize / 1.2;
 	
-	var Game = __webpack_require__(1);
-	var juego = new Game(ctx);
+	var GameView = __webpack_require__(12);
+	var newGame = new GameView(ctx);
 
 
 /***/ },
@@ -67,16 +67,16 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Patterns = __webpack_require__(2),
-	    Player = __webpack_require__(11),
-	    Hole = __webpack_require__(3),
-	    Ball = __webpack_require__(4),
-	    Cuestick = __webpack_require__(9);
+	    Player = __webpack_require__(3),
+	    Hole = __webpack_require__(4),
+	    Ball = __webpack_require__(5),
+	    Cuestick = __webpack_require__(10);
 	
 	TOP_LEFT = [DIM_X / 2 - REL_DIM, (DIM_Y - REL_DIM) / 2];
 	BOTTOM_RIGHT = [DIM_X / 2 + REL_DIM, (DIM_Y + REL_DIM) / 2];
 	BALL_RADIUS = REL_DIM * .04222;
 	
-	var BallConstants = __webpack_require__(10).NineBall;
+	var BallConstants = __webpack_require__(11).NineBall;
 	
 	var Game = function(ctx) {
 	  this.ctx = ctx;
@@ -101,13 +101,24 @@
 	  }.bind(this));
 	
 	  this.sunkBalls = [];
-	
-	  this.players = [ new Player(1,"Fred",this), new Player(2,"George",this) ];
 	  this.currentPlayer = 0;
 	
-	  this.patterns = new Patterns(ctx,this.startTurn.bind(this));
+	  this.patterns = new Patterns(ctx,this.drawTable.bind(this));
 	
 	  this.cuestick = new Cuestick(this.cueball);
+	};
+	
+	Game.prototype.addPlayers = function (playerNames) {
+	  this.players = [];
+	  var playerNumber = 1;
+	  playerNames.forEach(function(name) {
+	    this.players.push(new Player(playerNumber, name, this));
+	    playerNumber++;
+	  }.bind(this));
+	  console.log(this.players);
+	};
+	
+	Game.prototype.startGame = function () {
 	  this.cuestick.bindKeys(this.drawTable.bind(this), this.runTurn.bind(this));
 	  this.startTurn();
 	};
@@ -175,7 +186,6 @@
 	Game.prototype.updateNextTarget = function () {
 	  this.players[0].updateNextBall(this.ballArray[1].number);
 	  this.players[1].updateNextBall(this.ballArray[1].number);
-	  console.log(this.ballArray[1].number);
 	};
 	
 	Game.prototype.gameOver = function () {
@@ -237,6 +247,39 @@
 /* 3 */
 /***/ function(module, exports) {
 
+	var Player = function(id, nickname, game) {
+	  this.id = id;
+	  this.nickname = nickname || "Player " + id;
+	  this.nextBallNumber = 1;
+	  this.points = 0;
+	  this.game = game;
+	};
+	
+	Player.prototype.sinkBall = function (ball, gameOverCB) {
+	  if(ball.number === this.nextBall) {
+	    this.points++;
+	    if(ball.number === 9) this.game.gameWon();
+	  } else if (ball.number === 9) {
+	    this.game.gameOver();
+	  }
+	};
+	
+	Player.prototype.updateNextBall = function (nextNumber) {
+	  this.nextBallNumber = nextNumber;
+	};
+	
+	Player.prototype.gameLost = function (gameOverCB) {
+	  this.points = 0;
+	  gameOverCB();
+	};
+	
+	module.exports = Player;
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
 	var Hole = function(position) {
 	  this.radius = REL_DIM * .08444; // 114 mm / 1.35 m ~= diameter / table width
 	  this.pos = [];
@@ -289,13 +332,13 @@
 
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Utils = __webpack_require__(5),
-	    Collidable = __webpack_require__(6),
-	    VectorUtils = __webpack_require__(7),
-	    Accelerable = __webpack_require__(8);
+	var Utils = __webpack_require__(6),
+	    Collidable = __webpack_require__(7),
+	    VectorUtils = __webpack_require__(8),
+	    Accelerable = __webpack_require__(9);
 	
 	var Ball = function(options) {
 	  this.number = options.number;
@@ -328,7 +371,6 @@
 	    }.bind(this));
 	    holeArray.forEach(function(hole) {
 	      if(this.isInHole(hole)) {
-	        console.log("Is in hole");
 	        this.sink(hole);
 	      }
 	    }.bind(this));
@@ -348,13 +390,6 @@
 	  var distancia = VectorUtils.distance(this.pos,hole.pos);
 	  this.isSunk = true;
 	  this.vel = [0,0];
-	  console.log("SUNK: " + this.number);
-	  // if (distancia < 20) {
-	  //   console.log("SUNK");
-	  // } else {
-	  //   var unitVector = VectorUtils.radialOf(this.pos,hole.pos) / distancia;
-	  //   this.vel = VectorUtils.scale(10, unitVector);
-	  // }
 	};
 	
 	
@@ -429,7 +464,7 @@
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	var Utils = {
@@ -450,10 +485,10 @@
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(7);
+	var VectorUtils = __webpack_require__(8);
 	
 	var Collidable = {
 	  move: function() {
@@ -574,7 +609,7 @@
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	var VectorUtils = {
@@ -624,10 +659,10 @@
 
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(7);
+	var VectorUtils = __webpack_require__(8);
 	
 	var Accelerable = {
 	  accelerate: function(rate) {
@@ -651,10 +686,10 @@
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(7);
+	var VectorUtils = __webpack_require__(8);
 	
 	var Cuestick = function(cueball) {
 	  this.centeredOn = cueball.pos.slice();
@@ -776,6 +811,10 @@
 	  ctx.rotate(this.angle);
 	  ctx.fillStyle = '#ffca66';
 	  ctx.fillRect(50 + this.drawn, -5, REL_DIM * 1.5, 10);
+	  ctx.fillStyle = '#ffffff';
+	  ctx.fillRect(50 + this.drawn, -5, 25, 10);
+	  ctx.fillStyle = '#ff00ff';
+	  ctx.fillRect(50 + this.drawn, -5, 5, 10);
 	  ctx.rotate(-this.angle);
 	  ctx.translate(-this.centeredOn[0], -this.centeredOn[1]);
 	};
@@ -784,7 +823,7 @@
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports) {
 
 	var TIP_OF_TRIANGLE = DIM_X / 2 - REL_DIM / 2;
@@ -932,36 +971,104 @@
 
 
 /***/ },
-/* 11 */
-/***/ function(module, exports) {
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
 
-	var Player = function(id, nickname, game) {
-	  this.id = id;
-	  this.nickname = nickname || "Player " + id;
-	  this.nextBallNumber = 1;
-	  this.points = 0;
-	  this.game = game;
+	var GameViewElements = __webpack_require__(13),
+	    Game = __webpack_require__(1);
+	
+	var GameView = function(ctx) {
+	  this.$poolGame = $('.pool-game');
+	  this.playerNames = [];
+	  this.game = new Game(ctx);
+	  this.startPrompt();
+	  // TODO: Score-showing logic; pass callback to game to run every turn?
 	};
 	
-	Player.prototype.sinkBall = function (ball, gameOverCB) {
-	  if(ball.number === this.nextBall) {
-	    this.points++;
-	    if(ball.number === 9) this.game.gameWon();
-	  } else if (ball.number === 9) {
-	    this.game.gameOver();
+	GameView.prototype.startPrompt = function () {
+	  var promptEls = GameViewElements.startPrompt;
+	  var $startPrompt = $(promptEls.container),
+	      $twoP = $(promptEls.twoPlayerStart),
+	      $clickForInstr = $(promptEls.displayInstructions);
+	
+	  function getNames(e) {
+	    var $nameForm = $(promptEls.nameForm);
+	
+	    e.preventDefault();
+	    $nameForm.prepend($('<h2 id="which-player">Player 1: Enter Name</h2>'));
+	    $nameForm.submit(this.submitName.bind(this));
+	
+	    $startPrompt.empty();
+	    $startPrompt.append($nameForm);
+	  }
+	
+	  function getInstructions(e) {
+	    e.preventDefault();
+	
+	    var $instructions = $(promptEls.instructions);
+	    $startPrompt.empty();
+	    $startPrompt.append($instructions);
+	  }
+	
+	  $twoP.on("click", getNames.bind(this));
+	  $clickForInstr.on("click", getInstructions);
+	
+	  $startPrompt.append($twoP),
+	  $startPrompt.append($clickForInstr);
+	
+	  this.$poolGame.append($startPrompt);
+	};
+	
+	GameView.prototype.submitName = function (e) {
+	  e.preventDefault();
+	  var $nameInput = $('#player_name');
+	  this.playerNames.push($nameInput.val());
+	  if (this.playerNames.length < 2) {
+	    $nameInput.val("");
+	    $('#which-player').html('Player ' + (this.playerNames.length + 1) + ': Enter Name');
+	  } else {
+	    this.startGame();
 	  }
 	};
 	
-	Player.prototype.updateNextBall = function (nextNumber) {
-	  this.nextBallNumber = nextNumber;
+	GameView.prototype.startGame = function () {
+	  $('.start-prompt').remove();
+	  console.log(this.playerNames);
+	  this.game.addPlayers(this.playerNames);
+	  this.game.startGame();
 	};
 	
-	Player.prototype.gameLost = function (gameOverCB) {
-	  this.points = 0;
-	  gameOverCB();
+	GameView.prototype.displayScore = function () {
+	  var $scoreboard = $(GameViewElements.scoreboard);
+	  $scoreboard.html("Meow");
+	  this.$poolGame.append($scoreboard);
 	};
 	
-	module.exports = Player;
+	
+	
+	module.exports = GameView;
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+	var GameViewElements = {
+	  scoreboard: '<div class="scoreboard"></div>',
+	  startPrompt: {
+	    container: '<ul class="start-prompt"></ul>',
+	    twoPlayerStart: '<li id="start-two-game">Start 2P Game</li>',
+	    displayInstructions: '<li id="display-instructions">Display Instructions</li>',
+	    nameForm: '<form>\
+	      <label class="enter-name">Name: <input type="text" id="player_name" /></label>\
+	      <input type="submit" />\
+	    </form>',
+	    instructions: '<div class="instructions">Instructionzzz</div>'
+	  },
+	  gameOverPrompt: '<div class="game-over"></div>'
+	};
+	
+	module.exports = GameViewElements;
 
 
 /***/ }
