@@ -146,6 +146,9 @@ Game.prototype.gameOver = function () {
 };
 
 Game.prototype.gameLost = function () {
+  this.cuestick.disabled = true;
+  this.cuestick.unbindKeys();
+  this.drawTable();
   this.gameLostCB(this.currentPlayer);
 };
 
