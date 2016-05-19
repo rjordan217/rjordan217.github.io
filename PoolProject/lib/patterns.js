@@ -1,8 +1,8 @@
 var Patterns = function(ctx, imagesLoadedCB) {
   var woodImage = new Image();
-  woodImage.src ='./PoolProject/res/wood-pattern.png';
+  woodImage.src ='./res/wood-pattern.png';
   var greenFelt = new Image();
-  greenFelt.src = './PoolProject/res/pool_table.jpeg';
+  greenFelt.src = './res/pool_table.jpeg';
   var imagesLoaded = 0;
   woodImage.onload = function() {
     this.woodPattern = ctx.createPattern(woodImage, 'repeat');

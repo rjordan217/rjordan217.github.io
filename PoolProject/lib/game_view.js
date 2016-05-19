@@ -1,17 +1,33 @@
 var GameViewElements = require('./game_view_elements'),
     Game = require('./game');
 
-var GameView = function(ctx) {
+var GameView = function() {
   this.$poolGame = $('.pool-game');
+  this.$overlay = $(GameViewElements.overlay);
+  this.$scoreboard = $(GameViewElements.scoreboard);
+  this.launch();
+};
+
+GameView.prototype.launch = function () {
+  var $canvasEl = $(GameViewElements.canvasEl),
+      canvasEl = $canvasEl[0];
+
+  this.$poolGame.empty();
+  this.$poolGame.append($canvasEl);
+
   this.playerNames = [];
+
+  GET_MOUSE_POS = function(e) {
+    var rect = canvasEl.getBoundingClientRect();
+    return [ e.clientX - rect.left, e.clientY - rect.top ];
+  };
+
   this.game = new Game(
-    ctx,
+    canvasEl.getContext('2d'),
     this.displayScore.bind(this),
     this.gameLost.bind(this),
     this.gameOver.bind(this)
   );
-  this.$overlay = $(GameViewElements.overlay);
-  this.$scoreboard = $(GameViewElements.scoreboard);
   this.$poolGame.append(this.$overlay);
   this.startPrompt();
 };
@@ -63,12 +79,13 @@ GameView.prototype.startPrompt = function () {
 GameView.prototype.submitName = function (e) {
   e.preventDefault();
   var $nameInput = $('#player_name');
-  this.playerNames.push($nameInput.val());
+  var nextName = $nameInput.val() || "Player" + (this.playerNames.length + 1);
+  this.playerNames.push(nextName);
   if (this.playerNames.length < 2) {
     $nameInput.val("");
     $('#which-player').html('Player ' + (this.playerNames.length + 1));
   } else {
-    this.startGame();
+    this.startGame(this.canvasEl);
   }
 };
 
@@ -85,7 +102,7 @@ GameView.prototype.displayScore = function (player1Score, player2Score) {
   }
   this.$scoreboard.html(
     "<h3>Scores</h3><p>" + firstName(this.playerNames[0]) + ": " +
-    player1Score + ", " + firstName(this.playerNames[1]) + ": " + player2Score
+    player1Score + "<br>" + firstName(this.playerNames[1]) + ": " + player2Score
   );
   this.$poolGame.append(this.$scoreboard);
 };
@@ -104,9 +121,17 @@ GameView.prototype.gameLost = function (loserIdx) {
 };
 
 GameView.prototype.gameOver = function (winnerIdx) {
-  var $gameOverPrompt = $(GameViewElements.gameOverPrompt);
+  var $gameOverPrompt = $(GameViewElements.gameOverPrompt),
+      $playAgainButton = $(GameViewElements.playAgainButton);
+
   $gameOverPrompt.html("<h2>Congratulations, " + this.playerNames[winnerIdx] +
     "!<br>You won!</h2>");
+  $playAgainButton.on("click", function(e) {
+    e.preventDefault();
+    this.launch();
+  }.bind(this));
+  $gameOverPrompt.append($playAgainButton);
+
   this.$poolGame.append($gameOverPrompt);
   this.$poolGame.append(this.$overlay);
 };

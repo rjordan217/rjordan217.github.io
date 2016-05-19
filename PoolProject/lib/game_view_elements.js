@@ -1,4 +1,5 @@
 var GameViewElements = {
+  canvasEl: '<canvas id="pool-canvas" width="' + DIM_X + '" height="' + DIM_Y + '"></canvas>',
   scoreboard: '<div class="scoreboard"></div>',
   overlay: '<div class="overlay"></div>',
   backButton: '<button class="back-button">◀</button>',
@@ -27,7 +28,8 @@ more precision.<br>\
     </div>'
   },
   gameLost: '<div class="game-lost"><h2>You hit in the 9 ball!</h2></div>',
-  gameOverPrompt: '<div class="game-over"></div>'
+  gameOverPrompt: '<div class="game-over"></div>',
+  playAgainButton: '<button class="play-again">Play Again</button>'
 };
 
 module.exports = GameViewElements;

@@ -41,6 +41,8 @@ var Game = function(ctx, scoreCB, gameLostCB, gameOverCB) {
   this.patterns = new Patterns(ctx,this.drawTable.bind(this));
 
   this.cuestick = new Cuestick(this.cueball);
+
+  FORCE_OVER = this.gameOver.bind(this);
 };
 
 Game.prototype.addPlayers = function (playerNames) {
@@ -138,6 +140,8 @@ Game.prototype.calculateWinner = function () {
 
 Game.prototype.gameOver = function () {
   this.cuestick.disabled = true;
+  this.cuestick.unbindKeys();
+  this.drawTable();
   this.gameOverCB(this.calculateWinner());
 };
 

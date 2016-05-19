@@ -44,22 +44,14 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var canvasEl = document.getElementById('pool-canvas');
-	var ctx = canvasEl.getContext('2d');
-	
-	
-	GET_MOUSE_POS = function(e) {
-	    var rect = canvasEl.getBoundingClientRect();
-	    return [ e.clientX - rect.left, e.clientY - rect.top ];
-	};
-	
-	DIM_X = canvasEl.width;
-	DIM_Y = canvasEl.height;
+	DIM_X = 1100;
+	DIM_Y = 700;
 	var toSize = Math.min(DIM_X / 2, DIM_Y);
+	
 	REL_DIM = toSize / 1.2;
 	
 	var GameView = __webpack_require__(1);
-	var newGame = new GameView(ctx);
+	var newGame = new GameView();
 
 
 /***/ },
@@ -69,17 +61,33 @@
 	var GameViewElements = __webpack_require__(2),
 	    Game = __webpack_require__(3);
 	
-	var GameView = function(ctx) {
+	var GameView = function() {
 	  this.$poolGame = $('.pool-game');
+	  this.$overlay = $(GameViewElements.overlay);
+	  this.$scoreboard = $(GameViewElements.scoreboard);
+	  this.launch();
+	};
+	
+	GameView.prototype.launch = function () {
+	  var $canvasEl = $(GameViewElements.canvasEl),
+	      canvasEl = $canvasEl[0];
+	
+	  this.$poolGame.empty();
+	  this.$poolGame.append($canvasEl);
+	
 	  this.playerNames = [];
+	
+	  GET_MOUSE_POS = function(e) {
+	    var rect = canvasEl.getBoundingClientRect();
+	    return [ e.clientX - rect.left, e.clientY - rect.top ];
+	  };
+	
 	  this.game = new Game(
-	    ctx,
+	    canvasEl.getContext('2d'),
 	    this.displayScore.bind(this),
 	    this.gameLost.bind(this),
 	    this.gameOver.bind(this)
 	  );
-	  this.$overlay = $(GameViewElements.overlay);
-	  this.$scoreboard = $(GameViewElements.scoreboard);
 	  this.$poolGame.append(this.$overlay);
 	  this.startPrompt();
 	};
@@ -131,12 +139,13 @@
 	GameView.prototype.submitName = function (e) {
 	  e.preventDefault();
 	  var $nameInput = $('#player_name');
-	  this.playerNames.push($nameInput.val());
+	  var nextName = $nameInput.val() || "Player" + (this.playerNames.length + 1);
+	  this.playerNames.push(nextName);
 	  if (this.playerNames.length < 2) {
 	    $nameInput.val("");
 	    $('#which-player').html('Player ' + (this.playerNames.length + 1));
 	  } else {
-	    this.startGame();
+	    this.startGame(this.canvasEl);
 	  }
 	};
 	
@@ -153,7 +162,7 @@
 	  }
 	  this.$scoreboard.html(
 	    "<h3>Scores</h3><p>" + firstName(this.playerNames[0]) + ": " +
-	    player1Score + ", " + firstName(this.playerNames[1]) + ": " + player2Score
+	    player1Score + "<br>" + firstName(this.playerNames[1]) + ": " + player2Score
 	  );
 	  this.$poolGame.append(this.$scoreboard);
 	};
@@ -172,9 +181,17 @@
 	};
 	
 	GameView.prototype.gameOver = function (winnerIdx) {
-	  var $gameOverPrompt = $(GameViewElements.gameOverPrompt);
+	  var $gameOverPrompt = $(GameViewElements.gameOverPrompt),
+	      $playAgainButton = $(GameViewElements.playAgainButton);
+	
 	  $gameOverPrompt.html("<h2>Congratulations, " + this.playerNames[winnerIdx] +
 	    "!<br>You won!</h2>");
+	  $playAgainButton.on("click", function(e) {
+	    e.preventDefault();
+	    this.launch();
+	  }.bind(this));
+	  $gameOverPrompt.append($playAgainButton);
+	
 	  this.$poolGame.append($gameOverPrompt);
 	  this.$poolGame.append(this.$overlay);
 	};
@@ -187,6 +204,7 @@
 /***/ function(module, exports) {
 
 	var GameViewElements = {
+	  canvasEl: '<canvas id="pool-canvas" width="' + DIM_X + '" height="' + DIM_Y + '"></canvas>',
 	  scoreboard: '<div class="scoreboard"></div>',
 	  overlay: '<div class="overlay"></div>',
 	  backButton: '<button class="back-button">◀</button>',
@@ -215,7 +233,8 @@
 	    </div>'
 	  },
 	  gameLost: '<div class="game-lost"><h2>You hit in the 9 ball!</h2></div>',
-	  gameOverPrompt: '<div class="game-over"></div>'
+	  gameOverPrompt: '<div class="game-over"></div>',
+	  playAgainButton: '<button class="play-again">Play Again</button>'
 	};
 	
 	module.exports = GameViewElements;
@@ -268,6 +287,8 @@
 	  this.patterns = new Patterns(ctx,this.drawTable.bind(this));
 	
 	  this.cuestick = new Cuestick(this.cueball);
+	
+	  FORCE_OVER = this.gameOver.bind(this);
 	};
 	
 	Game.prototype.addPlayers = function (playerNames) {
@@ -365,6 +386,8 @@
 	
 	Game.prototype.gameOver = function () {
 	  this.cuestick.disabled = true;
+	  this.cuestick.unbindKeys();
+	  this.drawTable();
 	  this.gameOverCB(this.calculateWinner());
 	};
 	
@@ -404,9 +427,9 @@
 
 	var Patterns = function(ctx, imagesLoadedCB) {
 	  var woodImage = new Image();
-	  woodImage.src ='./PoolProject/res/wood-pattern.png';
+	  woodImage.src ='./res/wood-pattern.png';
 	  var greenFelt = new Image();
-	  greenFelt.src = './PoolProject/res/pool_table.jpeg';
+	  greenFelt.src = './res/pool_table.jpeg';
 	  var imagesLoaded = 0;
 	  woodImage.onload = function() {
 	    this.woodPattern = ctx.createPattern(woodImage, 'repeat');
@@ -896,7 +919,7 @@
 	  this.disabled = true;
 	
 	  function _fire(callback) {
-	    if(self.drawn > BALL_RADIUS) {
+	    if(self.drawn > -BALL_RADIUS) {
 	      self.drawn -= 10;
 	      callback();
 	      _fire(callback);
@@ -942,10 +965,12 @@
 	
 	Cuestick.prototype.clickedBinder = function (renderCB, e) {
 	  e.preventDefault();
-	  this.clickedFunc = setInterval(function() {
-	    this.drawBack(1);
-	    renderCB();
-	  }.bind(this),25)
+	  if(!this.disabled) {
+	    this.clickedFunc = setInterval(function() {
+	      this.drawBack(1);
+	      renderCB();
+	    }.bind(this),25)
+	  }
 	};
 	
 	Cuestick.prototype.unclickedBinder = function (e) {
@@ -955,43 +980,64 @@
 	
 	Cuestick.prototype.doubleClickBinder = function (renderCB, e) {
 	  e.preventDefault();
-	  this.resetDrawn();
-	  renderCB();
+	  if(!this.disabled) {
+	    this.resetDrawn();
+	    renderCB();
+	  }
 	};
 	
 	Cuestick.prototype.hoverBinder = function (renderCB, e) {
-	  var mousePos = GET_MOUSE_POS(e);
-	  var radial = VectorUtils.radialOf(this.centeredOn, mousePos);
-	  this.angle = VectorUtils.directionOf(radial);
-	  renderCB();
+	  if(!this.disabled) {
+	    var mousePos = GET_MOUSE_POS(e);
+	    var radial = VectorUtils.radialOf(this.centeredOn, mousePos);
+	    this.angle = VectorUtils.directionOf(radial);
+	    renderCB();
+	  }
 	};
 	
 	Cuestick.prototype.bindKeys = function (renderCB, turnCB) {
+	  this.keydownListener = this.keyBinder.bind(this,renderCB,turnCB);
 	  document.addEventListener(
 	    "keydown",
-	    this.keyBinder.bind(this,renderCB,turnCB),
-	    false
+	    this.keydownListener,
+	    true
 	  );
+	
+	  this.mousedownListener = this.clickedBinder.bind(this, renderCB);
 	  document.addEventListener(
 	    "mousedown",
-	    this.clickedBinder.bind(this, renderCB),
-	    false
+	    this.mousedownListener,
+	    true
 	  );
+	
+	  this.mouseupListener = this.unclickedBinder.bind(this);
 	  document.addEventListener(
 	    "mouseup",
-	    this.unclickedBinder.bind(this),
-	    false
+	    this.mouseupListener,
+	    true
 	  );
+	
+	  this.mousemoveListener = this.hoverBinder.bind(this, renderCB);
 	  document.addEventListener(
 	    "mousemove",
-	    this.hoverBinder.bind(this, renderCB),
-	    false
+	    this.mousemoveListener,
+	    true
 	  );
+	
+	  this.dblclickListener = this.doubleClickBinder.bind(this, renderCB);
 	  document.addEventListener(
 	    "dblclick",
-	    this.doubleClickBinder.bind(this, renderCB),
-	    false
+	    this.dblclickListener,
+	    true
 	  );
+	};
+	
+	Cuestick.prototype.unbindKeys = function () {
+	  document.removeEventListener("keydown", this.keydownListener, true);
+	  document.removeEventListener("mousedown", this.mousedownListener, true);
+	  document.removeEventListener("mouseup", this.mouseupListener, true);
+	  document.removeEventListener("mousemove", this.mousemoveListener, true);
+	  document.removeEventListener("dblclick", this.dblclickListener, true);
 	};
 	
 	Cuestick.prototype.updateCueball = function (newCueball) {

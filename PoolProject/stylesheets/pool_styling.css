@@ -75,6 +75,14 @@ input[type="submit"] {
   border-radius: 5px;
 }
 
+input[type="submit"]:hover {
+  box-shadow: 2px 2px 3px #735151;
+}
+
+input[type="submit"]:active {
+  box-shadow: 1px 1px 3px #735151;
+}
+
 .pool-game {
   font-family: "Lucida Console", monospace;
   margin: 100px auto;
@@ -90,6 +98,7 @@ input[type="submit"] {
   right: auto;
   left: auto;
   z-index: 0;
+  cursor: crosshair;
 }
 
 .overlay {
@@ -134,11 +143,32 @@ input[type="submit"] {
   display: inline-block;
 }
 
-.back-button {
+button {
   cursor: pointer;
+}
+
+.play-again {
+  background-color: rgba(255,255,255,.8);
+  padding: 1em;
+  margin-top: 30px;
+  border-radius: 10px;
+}
+
+.play-again:hover {
+  background-color: #661E1E;
+  box-shadow: 2px 2px 3px #735151;
+  color: white;
+}
+
+.play-again:active {
+  box-shadow: 1px 1px 3px #735151;
+}
+
+.back-button {
+  border-radius: 5px;
+  color: white;
   position: absolute;
   padding: 2px;
-  border-radius: 5px;
   top: 20px;
   left: 0;
 }
@@ -244,6 +274,7 @@ input[type="submit"] {
   height: 300px;
   background-size: cover;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   box-shadow: 5px 5px 3px black;

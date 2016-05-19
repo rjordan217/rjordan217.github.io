@@ -30,7 +30,7 @@ Cuestick.prototype.fire = function(renderCB, turnCallback) {
   this.disabled = true;
 
   function _fire(callback) {
-    if(self.drawn > BALL_RADIUS) {
+    if(self.drawn > -BALL_RADIUS) {
       self.drawn -= 10;
       callback();
       _fire(callback);
@@ -76,10 +76,12 @@ Cuestick.prototype.keyBinder = function (renderCB, turnCB, e) {
 
 Cuestick.prototype.clickedBinder = function (renderCB, e) {
   e.preventDefault();
-  this.clickedFunc = setInterval(function() {
-    this.drawBack(1);
-    renderCB();
-  }.bind(this),25)
+  if(!this.disabled) {
+    this.clickedFunc = setInterval(function() {
+      this.drawBack(1);
+      renderCB();
+    }.bind(this),25)
+  }
 };
 
 Cuestick.prototype.unclickedBinder = function (e) {
@@ -89,43 +91,64 @@ Cuestick.prototype.unclickedBinder = function (e) {
 
 Cuestick.prototype.doubleClickBinder = function (renderCB, e) {
   e.preventDefault();
-  this.resetDrawn();
-  renderCB();
+  if(!this.disabled) {
+    this.resetDrawn();
+    renderCB();
+  }
 };
 
 Cuestick.prototype.hoverBinder = function (renderCB, e) {
-  var mousePos = GET_MOUSE_POS(e);
-  var radial = VectorUtils.radialOf(this.centeredOn, mousePos);
-  this.angle = VectorUtils.directionOf(radial);
-  renderCB();
+  if(!this.disabled) {
+    var mousePos = GET_MOUSE_POS(e);
+    var radial = VectorUtils.radialOf(this.centeredOn, mousePos);
+    this.angle = VectorUtils.directionOf(radial);
+    renderCB();
+  }
 };
 
 Cuestick.prototype.bindKeys = function (renderCB, turnCB) {
+  this.keydownListener = this.keyBinder.bind(this,renderCB,turnCB);
   document.addEventListener(
     "keydown",
-    this.keyBinder.bind(this,renderCB,turnCB),
-    false
+    this.keydownListener,
+    true
   );
+
+  this.mousedownListener = this.clickedBinder.bind(this, renderCB);
   document.addEventListener(
     "mousedown",
-    this.clickedBinder.bind(this, renderCB),
-    false
+    this.mousedownListener,
+    true
   );
+
+  this.mouseupListener = this.unclickedBinder.bind(this);
   document.addEventListener(
     "mouseup",
-    this.unclickedBinder.bind(this),
-    false
+    this.mouseupListener,
+    true
   );
+
+  this.mousemoveListener = this.hoverBinder.bind(this, renderCB);
   document.addEventListener(
     "mousemove",
-    this.hoverBinder.bind(this, renderCB),
-    false
+    this.mousemoveListener,
+    true
   );
+
+  this.dblclickListener = this.doubleClickBinder.bind(this, renderCB);
   document.addEventListener(
     "dblclick",
-    this.doubleClickBinder.bind(this, renderCB),
-    false
+    this.dblclickListener,
+    true
   );
+};
+
+Cuestick.prototype.unbindKeys = function () {
+  document.removeEventListener("keydown", this.keydownListener, true);
+  document.removeEventListener("mousedown", this.mousedownListener, true);
+  document.removeEventListener("mouseup", this.mouseupListener, true);
+  document.removeEventListener("mousemove", this.mousemoveListener, true);
+  document.removeEventListener("dblclick", this.dblclickListener, true);
 };
 
 Cuestick.prototype.updateCueball = function (newCueball) {
