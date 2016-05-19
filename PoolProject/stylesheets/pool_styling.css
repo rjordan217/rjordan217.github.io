@@ -27,7 +27,7 @@ img {
 }
 
 body {
-  background: url('./PoolProject/res/orange_carpet.jpg') fixed;
+  background: url('../res/orange_carpet.jpg') fixed;
 }
 
 body * {
@@ -233,7 +233,7 @@ input[type="submit"] {
   top: 190px;
   left: 250px;
   z-index: 3;
-  background: black url('./PoolProject/res/fireworks.gif');
+  background: black url('../res/fireworks.gif');
   width: 600px;
   height: 300px;
   background-size: cover;
