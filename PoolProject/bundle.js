@@ -202,14 +202,16 @@
 	      <h3>Instructions</h3>\
 	      <p>9-ball pool is a two player game in which players try to sink the balls\
 	 in numerical order to get points, ending with the 9 ball. At the end of the \
-	 game, the player with the most points wins. Some caveats:<br>\
+	 game, the player with the most points wins.<br><br>Some caveats:<br>\
 	   -  To get points for sinking a ball, the cueball must strike it first that turn.<br>\
 	   -  Sinking the 9 ball before all other balls have been sunk results in immediate loss.<br><br>\
 	Controls: <br>\
 	  -  Reposition Cuestick: move cursor or use arrow keys when mouse stationary for \
 	more precision.<br>\
-	  -  Draw back Cuestick: click and hold<br>\
-	  -  Fire Cuestick: press *space*</p>\
+	  -  Draw Back Cuestick: click and hold<br>\
+	  -  Reset Cuestick: double click<br>\
+	  -  Fire Cuestick: press *space*<br>\
+	  <span class="center">***</span></p>\
 	    </div>'
 	  },
 	  gameLost: '<div class="game-lost"><h2>You hit in the 9 ball!</h2></div>',
@@ -894,17 +896,21 @@
 	  this.disabled = true;
 	
 	  function _fire(callback) {
-	    if(self.drawn > -30) {
+	    if(self.drawn > BALL_RADIUS) {
 	      self.drawn -= 10;
 	      callback();
 	      _fire(callback);
 	    } else {
 	      self.impartMomentum(originalDrawn);
-	      self.drawn = -50;
+	      self.resetDrawn();
 	      turnCallback();
 	    }
 	  }
 	  _fire(renderCB);
+	};
+	
+	Cuestick.prototype.resetDrawn = function () {
+	  this.drawn = 0;
 	};
 	
 	Cuestick.prototype.keyBinder = function (renderCB, turnCB, e) {
@@ -947,6 +953,12 @@
 	  clearInterval(this.clickedFunc);
 	};
 	
+	Cuestick.prototype.doubleClickBinder = function (renderCB, e) {
+	  e.preventDefault();
+	  this.resetDrawn();
+	  renderCB();
+	};
+	
 	Cuestick.prototype.hoverBinder = function (renderCB, e) {
 	  var mousePos = GET_MOUSE_POS(e);
 	  var radial = VectorUtils.radialOf(this.centeredOn, mousePos);
@@ -973,6 +985,11 @@
 	  document.addEventListener(
 	    "mousemove",
 	    this.hoverBinder.bind(this, renderCB),
+	    false
+	  );
+	  document.addEventListener(
+	    "dblclick",
+	    this.doubleClickBinder.bind(this, renderCB),
 	    false
 	  );
 	};

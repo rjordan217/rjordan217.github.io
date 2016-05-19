@@ -30,17 +30,21 @@ Cuestick.prototype.fire = function(renderCB, turnCallback) {
   this.disabled = true;
 
   function _fire(callback) {
-    if(self.drawn > -30) {
+    if(self.drawn > BALL_RADIUS) {
       self.drawn -= 10;
       callback();
       _fire(callback);
     } else {
       self.impartMomentum(originalDrawn);
-      self.drawn = -50;
+      self.resetDrawn();
       turnCallback();
     }
   }
   _fire(renderCB);
+};
+
+Cuestick.prototype.resetDrawn = function () {
+  this.drawn = 0;
 };
 
 Cuestick.prototype.keyBinder = function (renderCB, turnCB, e) {
@@ -83,6 +87,12 @@ Cuestick.prototype.unclickedBinder = function (e) {
   clearInterval(this.clickedFunc);
 };
 
+Cuestick.prototype.doubleClickBinder = function (renderCB, e) {
+  e.preventDefault();
+  this.resetDrawn();
+  renderCB();
+};
+
 Cuestick.prototype.hoverBinder = function (renderCB, e) {
   var mousePos = GET_MOUSE_POS(e);
   var radial = VectorUtils.radialOf(this.centeredOn, mousePos);
@@ -109,6 +119,11 @@ Cuestick.prototype.bindKeys = function (renderCB, turnCB) {
   document.addEventListener(
     "mousemove",
     this.hoverBinder.bind(this, renderCB),
+    false
+  );
+  document.addEventListener(
+    "dblclick",
+    this.doubleClickBinder.bind(this, renderCB),
     false
   );
 };
