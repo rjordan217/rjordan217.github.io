@@ -58,7 +58,7 @@
 	var toSize = Math.min(DIM_X / 2, DIM_Y);
 	REL_DIM = toSize / 1.2;
 	
-	var GameView = __webpack_require__(12);
+	var GameView = __webpack_require__(1);
 	var newGame = new GameView(ctx);
 
 
@@ -66,21 +66,181 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Patterns = __webpack_require__(2),
-	    Player = __webpack_require__(3),
-	    Hole = __webpack_require__(4),
-	    Ball = __webpack_require__(5),
-	    Cuestick = __webpack_require__(10);
+	var GameViewElements = __webpack_require__(2),
+	    Game = __webpack_require__(3);
+	
+	var GameView = function(ctx) {
+	  this.$poolGame = $('.pool-game');
+	  this.playerNames = [];
+	  this.game = new Game(
+	    ctx,
+	    this.displayScore.bind(this),
+	    this.gameLost.bind(this),
+	    this.gameOver.bind(this)
+	  );
+	  this.$overlay = $(GameViewElements.overlay);
+	  this.$scoreboard = $(GameViewElements.scoreboard);
+	  this.$poolGame.append(this.$overlay);
+	  this.startPrompt();
+	};
+	
+	GameView.prototype.startPrompt = function () {
+	  var promptEls = GameViewElements.startPrompt;
+	  var $startPrompt = $(promptEls.container),
+	      $twoP = $(promptEls.twoPlayerStart),
+	      $clickForInstr = $(promptEls.displayInstructions);
+	
+	  function getNames(e) {
+	    var $nameForm = $(promptEls.nameForm);
+	
+	    e.preventDefault();
+	    $nameForm.prepend($('<h2 id="which-player">Player 1</h2>'));
+	    $nameForm.submit(this.submitName.bind(this));
+	
+	    $startPrompt.empty();
+	    $startPrompt.append($nameForm);
+	  }
+	
+	  function getInstructions(e) {
+	    e.preventDefault();
+	
+	    var $instructions = $(promptEls.instructions),
+	        $backButton = $(GameViewElements.backButton);
+	
+	    $backButton.on("click", function(e) {
+	      e.preventDefault();
+	      $startPrompt.remove();
+	      this.startPrompt();
+	    }.bind(this));
+	
+	    $instructions.prepend($backButton);
+	
+	    $startPrompt.empty();
+	    $startPrompt.append($instructions);
+	  }
+	
+	  $twoP.on("click", getNames.bind(this));
+	  $clickForInstr.on("click", getInstructions.bind(this));
+	
+	  $startPrompt.append($twoP),
+	  $startPrompt.append($clickForInstr);
+	
+	  this.$poolGame.append($startPrompt);
+	};
+	
+	GameView.prototype.submitName = function (e) {
+	  e.preventDefault();
+	  var $nameInput = $('#player_name');
+	  this.playerNames.push($nameInput.val());
+	  if (this.playerNames.length < 2) {
+	    $nameInput.val("");
+	    $('#which-player').html('Player ' + (this.playerNames.length + 1));
+	  } else {
+	    this.startGame();
+	  }
+	};
+	
+	GameView.prototype.startGame = function () {
+	  $('.start-prompt').remove();
+	  this.$overlay.remove();
+	  this.game.addPlayers(this.playerNames);
+	  this.game.startGame();
+	};
+	
+	GameView.prototype.displayScore = function (player1Score, player2Score) {
+	  function firstName(fullName) {
+	    return fullName.match(/\w+/)[0];
+	  }
+	  this.$scoreboard.html(
+	    "<h3>Scores</h3><p>" + firstName(this.playerNames[0]) + ": " +
+	    player1Score + ", " + firstName(this.playerNames[1]) + ": " + player2Score
+	  );
+	  this.$poolGame.append(this.$scoreboard);
+	};
+	
+	GameView.prototype.gameLost = function (loserIdx) {
+	  var $gameLost = $(GameViewElements.gameLost);
+	  $gameLost.append('<h2>Sorry, ' + this.playerNames[loserIdx] + ', you lost!</h2>');
+	
+	  this.$poolGame.append(this.$overlay);
+	  this.$poolGame.append($gameLost);
+	
+	  setTimeout(function() {
+	    $gameLost.remove();
+	    this.gameOver((loserIdx + 1) % 2);
+	  }.bind(this), 5000);
+	};
+	
+	GameView.prototype.gameOver = function (winnerIdx) {
+	  var $gameOverPrompt = $(GameViewElements.gameOverPrompt);
+	  $gameOverPrompt.html("<h2>Congratulations, " + this.playerNames[winnerIdx] +
+	    "!<br>You won!</h2>");
+	  this.$poolGame.append($gameOverPrompt);
+	  this.$poolGame.append(this.$overlay);
+	};
+	
+	module.exports = GameView;
+
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	var GameViewElements = {
+	  scoreboard: '<div class="scoreboard"></div>',
+	  overlay: '<div class="overlay"></div>',
+	  backButton: '<button class="back-button">◀</button>',
+	  startPrompt: {
+	    container: '<ul class="start-prompt"><h1>9 Ball Pool</h1></ul>',
+	    twoPlayerStart: '<li id="start-two-game">Start 2P Game</li>',
+	    displayInstructions: '<li id="display-instructions">Display Instructions</li>',
+	    nameForm: '<form>\
+	      <label class="enter-name">Enter Name: <input type="text" id="player_name" /></label>\
+	      <input type="submit" />\
+	    </form>',
+	    instructions: '<div class="instructions">\
+	      <h3>Instructions</h3>\
+	      <p>9-ball pool is a two player game in which players try to sink the balls\
+	 in numerical order to get points, ending with the 9 ball. At the end of the \
+	 game, the player with the most points wins. Some caveats:<br>\
+	   -  To get points for sinking a ball, the cueball must strike it first that turn.<br>\
+	   -  Sinking the 9 ball before all other balls have been sunk results in immediate loss.<br><br>\
+	Controls: <br>\
+	  -  Reposition Cuestick: move cursor or use arrow keys when mouse stationary for \
+	more precision.<br>\
+	  -  Draw back Cuestick: click and hold<br>\
+	  -  Fire Cuestick: press *space*</p>\
+	    </div>'
+	  },
+	  gameLost: '<div class="game-lost"><h2>You hit in the 9 ball!</h2></div>',
+	  gameOverPrompt: '<div class="game-over"></div>'
+	};
+	
+	module.exports = GameViewElements;
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Patterns = __webpack_require__(4),
+	    Player = __webpack_require__(5),
+	    Hole = __webpack_require__(6),
+	    Ball = __webpack_require__(7),
+	    Cuestick = __webpack_require__(12);
 	
 	TOP_LEFT = [DIM_X / 2 - REL_DIM, (DIM_Y - REL_DIM) / 2];
 	BOTTOM_RIGHT = [DIM_X / 2 + REL_DIM, (DIM_Y + REL_DIM) / 2];
 	BALL_RADIUS = REL_DIM * .04222;
 	
-	var BallConstants = __webpack_require__(11).NineBall;
+	var BallConstants = __webpack_require__(13).NineBall;
 	
-	var Game = function(ctx) {
+	var Game = function(ctx, scoreCB, gameLostCB, gameOverCB) {
 	  this.ctx = ctx;
 	  this.ctx.font = "" + (2 * BALL_RADIUS / 3) + "px Arial";
+	  this.scoreCB = scoreCB;
+	  this.gameLostCB = gameLostCB;
+	  this.gameOverCB = gameOverCB;
 	
 	  this.ballArray = [];
 	  BallConstants.map(function(ballConstant) {
@@ -115,11 +275,11 @@
 	    this.players.push(new Player(playerNumber, name, this));
 	    playerNumber++;
 	  }.bind(this));
-	  console.log(this.players);
 	};
 	
 	Game.prototype.startGame = function () {
 	  this.cuestick.bindKeys(this.drawTable.bind(this), this.runTurn.bind(this));
+	  this.updateScore();
 	  this.startTurn();
 	};
 	
@@ -167,8 +327,9 @@
 	          if(playsAgain) self.currentPlayer = samePlayer;
 	          offset++;
 	        }
+	        self.updateScore();
+	        self.updateNextTarget();
 	      });
-	      self.updateNextTarget();
 	      toClear = requestAnimationFrame(function() {
 	        drawTable();
 	        callback();
@@ -188,8 +349,25 @@
 	  this.players[1].updateNextBall(this.ballArray[1].number);
 	};
 	
+	Game.prototype.updateScore = function () {
+	  this.scoreCB(this.players[0].points, this.players[1].points);
+	};
+	
+	Game.prototype.calculateWinner = function () {
+	  var currentsPoints = this.players[this.currentPlayer].points,
+	      otherPlayerIdx = (this.currentPlayer + 1) % 2,
+	      othersPoints = this.players[otherPlayerIdx].points;
+	
+	  return (currentsPoints >= othersPoints ? this.currentPlayer : otherPlayerIdx);
+	};
+	
 	Game.prototype.gameOver = function () {
-	  console.log(this.players[this.currentPlayer].nickname + " lost!");
+	  this.cuestick.disabled = true;
+	  this.gameOverCB(this.calculateWinner());
+	};
+	
+	Game.prototype.gameLost = function () {
+	  this.gameLostCB(this.currentPlayer);
 	};
 	
 	Game.prototype.drawTable = function () {
@@ -219,7 +397,7 @@
 
 
 /***/ },
-/* 2 */
+/* 4 */
 /***/ function(module, exports) {
 
 	var Patterns = function(ctx, imagesLoadedCB) {
@@ -244,7 +422,7 @@
 
 
 /***/ },
-/* 3 */
+/* 5 */
 /***/ function(module, exports) {
 
 	var Player = function(id, nickname, game) {
@@ -256,11 +434,12 @@
 	};
 	
 	Player.prototype.sinkBall = function (ball, gameOverCB) {
-	  if(ball.number === this.nextBall) {
+	  if(ball.number === this.nextBallNumber) {
 	    this.points++;
-	    if(ball.number === 9) this.game.gameWon();
+	    if(ball.number === 9) this.game.gameOver();
 	  } else if (ball.number === 9) {
-	    this.game.gameOver();
+	    this.points = 0;
+	    this.game.gameLost();
 	  }
 	};
 	
@@ -268,16 +447,11 @@
 	  this.nextBallNumber = nextNumber;
 	};
 	
-	Player.prototype.gameLost = function (gameOverCB) {
-	  this.points = 0;
-	  gameOverCB();
-	};
-	
 	module.exports = Player;
 
 
 /***/ },
-/* 4 */
+/* 6 */
 /***/ function(module, exports) {
 
 	var Hole = function(position) {
@@ -332,13 +506,13 @@
 
 
 /***/ },
-/* 5 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Utils = __webpack_require__(6),
-	    Collidable = __webpack_require__(7),
-	    VectorUtils = __webpack_require__(8),
-	    Accelerable = __webpack_require__(9);
+	var Utils = __webpack_require__(8),
+	    Collidable = __webpack_require__(9),
+	    VectorUtils = __webpack_require__(10),
+	    Accelerable = __webpack_require__(11);
 	
 	var Ball = function(options) {
 	  this.number = options.number;
@@ -464,7 +638,7 @@
 
 
 /***/ },
-/* 6 */
+/* 8 */
 /***/ function(module, exports) {
 
 	var Utils = {
@@ -485,10 +659,10 @@
 
 
 /***/ },
-/* 7 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(8);
+	var VectorUtils = __webpack_require__(10);
 	
 	var Collidable = {
 	  move: function() {
@@ -599,7 +773,6 @@
 	        scaledRad = VectorUtils.scale(2 * this.radius / distance, VectorUtils.radialOf(this.pos, otherBall.pos));
 	
 	        this.pos = VectorUtils.vectorSum(otherBall.pos,VectorUtils.negativeOf(scaledRad));
-	        // otherBall.pos = VectorUtils.vectorSum(otherBall.pos,scaledToRad);
 	      }
 	    }.bind(this));
 	  }
@@ -609,7 +782,7 @@
 
 
 /***/ },
-/* 8 */
+/* 10 */
 /***/ function(module, exports) {
 
 	var VectorUtils = {
@@ -659,10 +832,10 @@
 
 
 /***/ },
-/* 9 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(8);
+	var VectorUtils = __webpack_require__(10);
 	
 	var Accelerable = {
 	  accelerate: function(rate) {
@@ -686,16 +859,17 @@
 
 
 /***/ },
-/* 10 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(8);
+	var VectorUtils = __webpack_require__(10);
 	
 	var Cuestick = function(cueball) {
 	  this.centeredOn = cueball.pos.slice();
 	  this.cueball = cueball;
 	  this.angle = 0;
 	  this.drawn = 0;
+	  this.disabled = false;
 	};
 	
 	Cuestick.prototype.rotate = function (direction) {
@@ -717,6 +891,7 @@
 	Cuestick.prototype.fire = function(renderCB, turnCallback) {
 	  var self = this;
 	  var originalDrawn = this.drawn;
+	  this.disabled = true;
 	
 	  function _fire(callback) {
 	    if(self.drawn > -30) {
@@ -734,26 +909,28 @@
 	
 	Cuestick.prototype.keyBinder = function (renderCB, turnCB, e) {
 	  e.preventDefault();
-	  switch (e.keyCode) {
-	    case 40:
-	      this.drawBack(1);
-	      renderCB();
-	      break;
-	    case 38:
-	      this.drawBack(-1);
-	      renderCB();
-	      break;
-	    case 37:
-	      this.rotate(1);
-	      renderCB();
-	      break;
-	    case 39:
-	      this.rotate(-1);
-	      renderCB();
-	      break;
-	    case 32:
-	      this.fire(renderCB, turnCB);
-	      break;
+	  if(!this.disabled) {
+	    switch (e.keyCode) {
+	      case 40:
+	        this.drawBack(1);
+	        renderCB();
+	        break;
+	      case 38:
+	        this.drawBack(-1);
+	        renderCB();
+	        break;
+	      case 37:
+	        this.rotate(1);
+	        renderCB();
+	        break;
+	      case 39:
+	        this.rotate(-1);
+	        renderCB();
+	        break;
+	      case 32:
+	        this.fire(renderCB, turnCB);
+	        break;
+	    }
 	  }
 	};
 	
@@ -804,6 +981,7 @@
 	  this.centeredOn = newCueball.pos.slice();
 	  this.cueball = newCueball;
 	  this.drawn = 0;
+	  this.disabled = false;
 	};
 	
 	Cuestick.prototype.draw = function (ctx) {
@@ -823,7 +1001,7 @@
 
 
 /***/ },
-/* 11 */
+/* 13 */
 /***/ function(module, exports) {
 
 	var TIP_OF_TRIANGLE = DIM_X / 2 - REL_DIM / 2;
@@ -968,107 +1146,6 @@
 	};
 	
 	module.exports = BallConstants;
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var GameViewElements = __webpack_require__(13),
-	    Game = __webpack_require__(1);
-	
-	var GameView = function(ctx) {
-	  this.$poolGame = $('.pool-game');
-	  this.playerNames = [];
-	  this.game = new Game(ctx);
-	  this.startPrompt();
-	  // TODO: Score-showing logic; pass callback to game to run every turn?
-	};
-	
-	GameView.prototype.startPrompt = function () {
-	  var promptEls = GameViewElements.startPrompt;
-	  var $startPrompt = $(promptEls.container),
-	      $twoP = $(promptEls.twoPlayerStart),
-	      $clickForInstr = $(promptEls.displayInstructions);
-	
-	  function getNames(e) {
-	    var $nameForm = $(promptEls.nameForm);
-	
-	    e.preventDefault();
-	    $nameForm.prepend($('<h2 id="which-player">Player 1: Enter Name</h2>'));
-	    $nameForm.submit(this.submitName.bind(this));
-	
-	    $startPrompt.empty();
-	    $startPrompt.append($nameForm);
-	  }
-	
-	  function getInstructions(e) {
-	    e.preventDefault();
-	
-	    var $instructions = $(promptEls.instructions);
-	    $startPrompt.empty();
-	    $startPrompt.append($instructions);
-	  }
-	
-	  $twoP.on("click", getNames.bind(this));
-	  $clickForInstr.on("click", getInstructions);
-	
-	  $startPrompt.append($twoP),
-	  $startPrompt.append($clickForInstr);
-	
-	  this.$poolGame.append($startPrompt);
-	};
-	
-	GameView.prototype.submitName = function (e) {
-	  e.preventDefault();
-	  var $nameInput = $('#player_name');
-	  this.playerNames.push($nameInput.val());
-	  if (this.playerNames.length < 2) {
-	    $nameInput.val("");
-	    $('#which-player').html('Player ' + (this.playerNames.length + 1) + ': Enter Name');
-	  } else {
-	    this.startGame();
-	  }
-	};
-	
-	GameView.prototype.startGame = function () {
-	  $('.start-prompt').remove();
-	  console.log(this.playerNames);
-	  this.game.addPlayers(this.playerNames);
-	  this.game.startGame();
-	};
-	
-	GameView.prototype.displayScore = function () {
-	  var $scoreboard = $(GameViewElements.scoreboard);
-	  $scoreboard.html("Meow");
-	  this.$poolGame.append($scoreboard);
-	};
-	
-	
-	
-	module.exports = GameView;
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports) {
-
-	var GameViewElements = {
-	  scoreboard: '<div class="scoreboard"></div>',
-	  startPrompt: {
-	    container: '<ul class="start-prompt"></ul>',
-	    twoPlayerStart: '<li id="start-two-game">Start 2P Game</li>',
-	    displayInstructions: '<li id="display-instructions">Display Instructions</li>',
-	    nameForm: '<form>\
-	      <label class="enter-name">Name: <input type="text" id="player_name" /></label>\
-	      <input type="submit" />\
-	    </form>',
-	    instructions: '<div class="instructions">Instructionzzz</div>'
-	  },
-	  gameOverPrompt: '<div class="game-over"></div>'
-	};
-	
-	module.exports = GameViewElements;
 
 
 /***/ }

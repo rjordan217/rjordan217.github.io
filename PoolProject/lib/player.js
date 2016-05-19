@@ -7,21 +7,17 @@ var Player = function(id, nickname, game) {
 };
 
 Player.prototype.sinkBall = function (ball, gameOverCB) {
-  if(ball.number === this.nextBall) {
+  if(ball.number === this.nextBallNumber) {
     this.points++;
-    if(ball.number === 9) this.game.gameWon();
+    if(ball.number === 9) this.game.gameOver();
   } else if (ball.number === 9) {
-    this.game.gameOver();
+    this.points = 0;
+    this.game.gameLost();
   }
 };
 
 Player.prototype.updateNextBall = function (nextNumber) {
   this.nextBallNumber = nextNumber;
-};
-
-Player.prototype.gameLost = function (gameOverCB) {
-  this.points = 0;
-  gameOverCB();
 };
 
 module.exports = Player;

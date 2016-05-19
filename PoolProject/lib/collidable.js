@@ -109,7 +109,6 @@ var Collidable = {
         scaledRad = VectorUtils.scale(2 * this.radius / distance, VectorUtils.radialOf(this.pos, otherBall.pos));
 
         this.pos = VectorUtils.vectorSum(otherBall.pos,VectorUtils.negativeOf(scaledRad));
-        // otherBall.pos = VectorUtils.vectorSum(otherBall.pos,scaledToRad);
       }
     }.bind(this));
   }

@@ -5,6 +5,7 @@ var Cuestick = function(cueball) {
   this.cueball = cueball;
   this.angle = 0;
   this.drawn = 0;
+  this.disabled = false;
 };
 
 Cuestick.prototype.rotate = function (direction) {
@@ -26,6 +27,7 @@ Cuestick.prototype.impartMomentum = function (power) {
 Cuestick.prototype.fire = function(renderCB, turnCallback) {
   var self = this;
   var originalDrawn = this.drawn;
+  this.disabled = true;
 
   function _fire(callback) {
     if(self.drawn > -30) {
@@ -43,26 +45,28 @@ Cuestick.prototype.fire = function(renderCB, turnCallback) {
 
 Cuestick.prototype.keyBinder = function (renderCB, turnCB, e) {
   e.preventDefault();
-  switch (e.keyCode) {
-    case 40:
-      this.drawBack(1);
-      renderCB();
-      break;
-    case 38:
-      this.drawBack(-1);
-      renderCB();
-      break;
-    case 37:
-      this.rotate(1);
-      renderCB();
-      break;
-    case 39:
-      this.rotate(-1);
-      renderCB();
-      break;
-    case 32:
-      this.fire(renderCB, turnCB);
-      break;
+  if(!this.disabled) {
+    switch (e.keyCode) {
+      case 40:
+        this.drawBack(1);
+        renderCB();
+        break;
+      case 38:
+        this.drawBack(-1);
+        renderCB();
+        break;
+      case 37:
+        this.rotate(1);
+        renderCB();
+        break;
+      case 39:
+        this.rotate(-1);
+        renderCB();
+        break;
+      case 32:
+        this.fire(renderCB, turnCB);
+        break;
+    }
   }
 };
 
@@ -113,6 +117,7 @@ Cuestick.prototype.updateCueball = function (newCueball) {
   this.centeredOn = newCueball.pos.slice();
   this.cueball = newCueball;
   this.drawn = 0;
+  this.disabled = false;
 };
 
 Cuestick.prototype.draw = function (ctx) {

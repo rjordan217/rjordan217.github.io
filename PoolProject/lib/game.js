@@ -10,9 +10,12 @@ BALL_RADIUS = REL_DIM * .04222;
 
 var BallConstants = require('./ball_constants').NineBall;
 
-var Game = function(ctx) {
+var Game = function(ctx, scoreCB, gameLostCB, gameOverCB) {
   this.ctx = ctx;
   this.ctx.font = "" + (2 * BALL_RADIUS / 3) + "px Arial";
+  this.scoreCB = scoreCB;
+  this.gameLostCB = gameLostCB;
+  this.gameOverCB = gameOverCB;
 
   this.ballArray = [];
   BallConstants.map(function(ballConstant) {
@@ -47,11 +50,11 @@ Game.prototype.addPlayers = function (playerNames) {
     this.players.push(new Player(playerNumber, name, this));
     playerNumber++;
   }.bind(this));
-  console.log(this.players);
 };
 
 Game.prototype.startGame = function () {
   this.cuestick.bindKeys(this.drawTable.bind(this), this.runTurn.bind(this));
+  this.updateScore();
   this.startTurn();
 };
 
@@ -99,8 +102,9 @@ Game.prototype.runTurn = function () {
           if(playsAgain) self.currentPlayer = samePlayer;
           offset++;
         }
+        self.updateScore();
+        self.updateNextTarget();
       });
-      self.updateNextTarget();
       toClear = requestAnimationFrame(function() {
         drawTable();
         callback();
@@ -120,8 +124,25 @@ Game.prototype.updateNextTarget = function () {
   this.players[1].updateNextBall(this.ballArray[1].number);
 };
 
+Game.prototype.updateScore = function () {
+  this.scoreCB(this.players[0].points, this.players[1].points);
+};
+
+Game.prototype.calculateWinner = function () {
+  var currentsPoints = this.players[this.currentPlayer].points,
+      otherPlayerIdx = (this.currentPlayer + 1) % 2,
+      othersPoints = this.players[otherPlayerIdx].points;
+
+  return (currentsPoints >= othersPoints ? this.currentPlayer : otherPlayerIdx);
+};
+
 Game.prototype.gameOver = function () {
-  console.log(this.players[this.currentPlayer].nickname + " lost!");
+  this.cuestick.disabled = true;
+  this.gameOverCB(this.calculateWinner());
+};
+
+Game.prototype.gameLost = function () {
+  this.gameLostCB(this.currentPlayer);
 };
 
 Game.prototype.drawTable = function () {
