@@ -121,6 +121,28 @@ Ball.prototype.draw = function (ctx) {
     }
   }
 
+  var pos = this.pos,
+  rad = this.radius;
+  gradient = ctx.createLinearGradient(pos[0] - rad, pos[1] - rad, pos[0] + rad, pos[1] + rad);
+
+  gradient.addColorStop(0, 'rgba(0,0,0,0)');
+  gradient.addColorStop(1, 'rgba(0,0,0,.3)');
+
+  ctx.fillStyle = gradient;
+
+  ctx.beginPath();
+
+  ctx.arc(
+    this.pos[0],
+    this.pos[1],
+    this.radius,
+    0,
+    2 * Math.PI,
+    false
+  );
+
+  ctx.fill();
+
 };
 
 module.exports = Ball;
