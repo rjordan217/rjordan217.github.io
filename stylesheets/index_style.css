@@ -103,6 +103,10 @@ td:last-child {
   height: auto;
 }
 
+.name {
+  cursor: pointer;
+}
+
 .nav-item {
   padding: 10px;
   border-left: 2px solid #fff;
@@ -147,7 +151,7 @@ td:last-child {
 
 .main {
   position: relative;
-  z-index: 8;
+  z-index: 7;
 }
 
 .main h1 {
@@ -193,7 +197,11 @@ p {
   padding: 0 15px;
 }
 
-.projects {
+#proyectos:hover .category-slider {
+    width: 40px;
+}
+
+.projects-flex {
   display: flex;
   justify-content: space-around;
   flex-wrap: wrap;
@@ -239,6 +247,29 @@ p {
   background-size: 100% auto;
   background-repeat: no-repeat;
   background-position: center;
+}
+
+.arrow-up {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+
+  border-bottom: 5px solid black;
+}
+
+#proj-desc-anchor {
+  margin: 20px;
+  padding: 10px;
+  border-radius: 20px;
+  border: 5px outset navy;
+  background-color: rgba(173, 216, 230,1);
+  color: black;
+}
+
+#proj-desc-anchor h2 {
+  text-align: center;
+  margin-top: 20px;
 }
 
 #contact {
