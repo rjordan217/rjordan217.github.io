@@ -58,12 +58,13 @@ var optimizedResize = (function() {
     }
 }());
 
+var aboutImg = document.getElementById('about-img');
 // start process
 optimizedResize.add(function() {
     if (window.innerWidth <= 1100) {
-      if(document.images[0].src !== './res/insta.jpg') document.images[0].src = './res/insta.jpg';
+      if(aboutImg.src !== './res/insta.jpg') aboutImg.src = './res/insta.jpg';
     } else {
-      if(document.images[0].src !== './res/marchetti.jpg') document.images[0].src = './res/marchetti.jpg';
+      if(aboutImg.src !== './res/marchetti.jpg') aboutImg.src = './res/marchetti.jpg';
     }
 });
 
