@@ -38,4 +38,4 @@ function haaLastStroke(t) {
   return [addVectors(vectorContributions), t + .003];
 }
 
-module.exports = [haaFirstStroke, haaLoop, haaLastStroke];
+module.exports = [[[-40, -60], haaFirstStroke], [haaLoop], [haaLastStroke]];

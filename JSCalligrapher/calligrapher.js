@@ -1,8 +1,7 @@
 var canvasEl = document.getElementById('canvas');
 var ctx = canvasEl.getContext('2d');
 
-ctx.fillStyle = 'black';
-var startPos = [ 3 * canvasEl.width / 4, canvasEl.height / 4];
+var startPos = [ 7 * canvasEl.width / 8, canvasEl.height / 4];
 
 var Brush = require('./lib/brush');
 var MultipleBeziers = require('./utils/multiple_beziers');
@@ -35,14 +34,58 @@ var brush = new Brush(ctx, startPos, 3 * canvasEl.height / 4);
 
 var Arabic = require('./alphabets/arabic');
 
-var startButton = document.createElement("button"),
-    stopButton = document.createElement("button");
+// var startButton = document.createElement("button"),
+//     stopButton = document.createElement("button");
+//
+// startButton.innerHTML = "Start";
+// stopButton.innerHTML = "Stop";
 
-startButton.innerHTML = "Start";
-stopButton.innerHTML = "Stop";
+Array.prototype.deepDup = function() {
+  var duplicate = [];
+  this.forEach(function(el) {
+    var toPush;
+    if(el instanceof Array) {
+      toPush = el.deepDup();
+    } else {
+      toPush = el;
+    }
+    duplicate.push(toPush);
+  });
+  return duplicate;
+};
 
-startButton.onclick = brush.cgStart.bind(brush, Arabic.alif1.concat(Arabic.haa1.concat(Arabic.lamalf23)));
-stopButton.onclick = brush.cgStop.bind(brush);
+var phrase = Arabic.alif1.concat(
+  Arabic.haa1.concat(
+    Arabic.lamalf23.deepDup().concat(
+      Arabic.tanwiin.deepDup().concat(
+        Arabic.space.concat(
+          Arabic.waaw.concat(
+            Arabic.siin1.concat(
+              Arabic.haa2.concat(
+                Arabic.lamalf23.deepDup().concat(
+                  Arabic.tanwiin.deepDup()
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+);
 
-canvasEl.parentNode.appendChild(startButton);
-canvasEl.parentNode.appendChild(stopButton);
+// startButton.onclick = brush.cgStart.bind(
+//   brush,
+//   phrase
+// );
+// stopButton.onclick = brush.cgStop.bind(brush);
+//
+// canvasEl.parentNode.appendChild(startButton);
+// canvasEl.parentNode.appendChild(stopButton);
+
+setTimeout(function() {
+  ctx.fillStyle = '#E9FBFF';
+  ctx.fillRect(0,0,900,500);
+  ctx.fillStyle = 'black'
+  brush.cgStart(phrase);
+}, 3000);

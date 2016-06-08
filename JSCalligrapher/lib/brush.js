@@ -5,7 +5,7 @@ var Brush = function(ctx, startPos, baseline, brushSize) {
   this.startPos = startPos;
   this.currentPos = startPos.slice();
   this.baseline = baseline;
-  this.brushSize = brushSize || [30, 1];
+  this.brushSize = brushSize || [25, 1];
   this.time = 0;
 }
 
@@ -21,19 +21,9 @@ Brush.prototype.cgStroke = function () {
   ctx.translate(-this.currentPos[0], -this.currentPos[1]);
 };
 
-Brush.prototype.cgStrokeDown = function (toOffset) {
-  toOffset = toOffset || 0;
-  if (this.currentPos[1] <= this.baseline + toOffset) {
-    this.cgStroke();
-    this.currentPos[1] += 1;
-  } else {
-    return true;
-  }
-};
-
-Brush.prototype.cgStrokePath = function (pathFun, startOfStroke) {
+Brush.prototype.cgStrokePath = function (pathFun, startOfStroke, isSpace) {
   if(this.time <= 1) {
-    this.cgStroke();
+    if (!isSpace) this.cgStroke();
     var del = pathFun(this.time);
     this.currentPos = addVectors([startOfStroke, del[0]]);
     this.time = del[1];
@@ -43,15 +33,36 @@ Brush.prototype.cgStrokePath = function (pathFun, startOfStroke) {
   }
 };
 
+
 Brush.prototype.cgStart = function(funcsToDraw) {
+  function processOffsets(funcWithOffsets) {
+    if(funcWithOffsets[0] instanceof Function) {
+      funcWithOffsets.unshift([0,0]);
+    }
+    if(funcWithOffsets.length < 3) {
+      funcWithOffsets.push([0,0]);
+    }
+    return funcWithOffsets;
+  }
+
   var self = this;
+
   function drawAndCallNext() {
     if(funcsToDraw.length > 0) {
+      var funcAndOffsets = processOffsets(funcsToDraw.shift());
+
+      var offsetBefore = funcAndOffsets.shift(),
+          currentFunc = funcAndOffsets.shift(),
+          offsetAfter = funcAndOffsets.shift();
+
+      self.currentPos = addVectors([self.currentPos, offsetBefore]);
       var originalPos = self.currentPos;
-      var currentFunc = funcsToDraw.shift();
+      var isSpace = (currentFunc.name === "space");
+      
       self.strokeInterval = setInterval(function() {
-        if(self.cgStrokePath(currentFunc, originalPos) && self.strokeInterval) {
+        if(self.cgStrokePath(currentFunc, originalPos, isSpace) && self.strokeInterval) {
           clearInterval(self.strokeInterval);
+          self.currentPos = addVectors([self.currentPos, offsetAfter]);
           drawAndCallNext();
         }
       }, 1);

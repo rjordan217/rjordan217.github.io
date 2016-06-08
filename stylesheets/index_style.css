@@ -74,6 +74,12 @@ td:last-child {
   color: #001F7D;
 }
 
+canvas {
+  margin: auto;
+  padding-top: 56px;
+  display: block;
+}
+
 .overlay {
   background-color: rgba(0,50,100,.9);
   background-size: cover;

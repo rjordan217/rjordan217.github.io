@@ -47,8 +47,7 @@
 	var canvasEl = document.getElementById('canvas');
 	var ctx = canvasEl.getContext('2d');
 	
-	ctx.fillStyle = 'black';
-	var startPos = [ 3 * canvasEl.width / 4, canvasEl.height / 4];
+	var startPos = [ 7 * canvasEl.width / 8, canvasEl.height / 4];
 	
 	var Brush = __webpack_require__(1);
 	var MultipleBeziers = __webpack_require__(3);
@@ -81,17 +80,61 @@
 	
 	var Arabic = __webpack_require__(6);
 	
-	var startButton = document.createElement("button"),
-	    stopButton = document.createElement("button");
+	// var startButton = document.createElement("button"),
+	//     stopButton = document.createElement("button");
+	//
+	// startButton.innerHTML = "Start";
+	// stopButton.innerHTML = "Stop";
 	
-	startButton.innerHTML = "Start";
-	stopButton.innerHTML = "Stop";
+	Array.prototype.deepDup = function() {
+	  var duplicate = [];
+	  this.forEach(function(el) {
+	    var toPush;
+	    if(el instanceof Array) {
+	      toPush = el.deepDup();
+	    } else {
+	      toPush = el;
+	    }
+	    duplicate.push(toPush);
+	  });
+	  return duplicate;
+	};
 	
-	startButton.onclick = brush.cgStart.bind(brush, Arabic.alif1.concat(Arabic.haa1.concat(Arabic.lamalf23)));
-	stopButton.onclick = brush.cgStop.bind(brush);
+	var phrase = Arabic.alif1.concat(
+	  Arabic.haa1.concat(
+	    Arabic.lamalf23.deepDup().concat(
+	      Arabic.tanwiin.deepDup().concat(
+	        Arabic.space.concat(
+	          Arabic.waaw.concat(
+	            Arabic.siin1.concat(
+	              Arabic.haa2.concat(
+	                Arabic.lamalf23.deepDup().concat(
+	                  Arabic.tanwiin.deepDup()
+	                )
+	              )
+	            )
+	          )
+	        )
+	      )
+	    )
+	  )
+	);
 	
-	canvasEl.parentNode.appendChild(startButton);
-	canvasEl.parentNode.appendChild(stopButton);
+	// startButton.onclick = brush.cgStart.bind(
+	//   brush,
+	//   phrase
+	// );
+	// stopButton.onclick = brush.cgStop.bind(brush);
+	//
+	// canvasEl.parentNode.appendChild(startButton);
+	// canvasEl.parentNode.appendChild(stopButton);
+	
+	setTimeout(function() {
+	  ctx.fillStyle = '#E9FBFF';
+	  ctx.fillRect(0,0,900,500);
+	  ctx.fillStyle = 'black'
+	  brush.cgStart(phrase);
+	}, 3000);
 
 
 /***/ },
@@ -105,7 +148,7 @@
 	  this.startPos = startPos;
 	  this.currentPos = startPos.slice();
 	  this.baseline = baseline;
-	  this.brushSize = brushSize || [30, 1];
+	  this.brushSize = brushSize || [25, 1];
 	  this.time = 0;
 	}
 	
@@ -121,19 +164,9 @@
 	  ctx.translate(-this.currentPos[0], -this.currentPos[1]);
 	};
 	
-	Brush.prototype.cgStrokeDown = function (toOffset) {
-	  toOffset = toOffset || 0;
-	  if (this.currentPos[1] <= this.baseline + toOffset) {
-	    this.cgStroke();
-	    this.currentPos[1] += 1;
-	  } else {
-	    return true;
-	  }
-	};
-	
-	Brush.prototype.cgStrokePath = function (pathFun, startOfStroke) {
+	Brush.prototype.cgStrokePath = function (pathFun, startOfStroke, isSpace) {
 	  if(this.time <= 1) {
-	    this.cgStroke();
+	    if (!isSpace) this.cgStroke();
 	    var del = pathFun(this.time);
 	    this.currentPos = addVectors([startOfStroke, del[0]]);
 	    this.time = del[1];
@@ -143,15 +176,36 @@
 	  }
 	};
 	
+	
 	Brush.prototype.cgStart = function(funcsToDraw) {
+	  function processOffsets(funcWithOffsets) {
+	    if(funcWithOffsets[0] instanceof Function) {
+	      funcWithOffsets.unshift([0,0]);
+	    }
+	    if(funcWithOffsets.length < 3) {
+	      funcWithOffsets.push([0,0]);
+	    }
+	    return funcWithOffsets;
+	  }
+	
 	  var self = this;
+	
 	  function drawAndCallNext() {
 	    if(funcsToDraw.length > 0) {
+	      var funcAndOffsets = processOffsets(funcsToDraw.shift());
+	
+	      var offsetBefore = funcAndOffsets.shift(),
+	          currentFunc = funcAndOffsets.shift(),
+	          offsetAfter = funcAndOffsets.shift();
+	
+	      self.currentPos = addVectors([self.currentPos, offsetBefore]);
 	      var originalPos = self.currentPos;
-	      var currentFunc = funcsToDraw.shift();
+	      var isSpace = (currentFunc.name === "space");
+	      
 	      self.strokeInterval = setInterval(function() {
-	        if(self.cgStrokePath(currentFunc, originalPos) && self.strokeInterval) {
+	        if(self.cgStrokePath(currentFunc, originalPos, isSpace) && self.strokeInterval) {
 	          clearInterval(self.strokeInterval);
+	          self.currentPos = addVectors([self.currentPos, offsetAfter]);
 	          drawAndCallNext();
 	        }
 	      }, 1);
@@ -382,7 +436,8 @@
 	  dhaal: [],
 	  raa: [],
 	  zayn: [],
-	  siin: [],
+	  siin: __webpack_require__(17),
+	  siin1: __webpack_require__(18),
 	  shiin: [],
 	  Saad: [],
 	  Daad: [],
@@ -395,17 +450,20 @@
 	  kaaf: [],
 	  laam: [],
 	  miim: [],
-	  nuun: [],
+	  nun: __webpack_require__(11),
 	  haa1: __webpack_require__(8),
-	  waw: [],
+	  haa2: __webpack_require__(19),
+	  waaw: __webpack_require__(15),
 	  yaa: [],
 	  taamrbTa: [],
 	  lamalf23: __webpack_require__(9),
 	  alfmqSra: [],
 	  hamza: [],
-	  fatHa: [],
+	  fatHa: __webpack_require__(14),
 	  Damma: [],
-	  ksra: []
+	  ksra: [],
+	  tanwiin: __webpack_require__(13),
+	  space: __webpack_require__(16)
 	};
 
 
@@ -441,7 +499,7 @@
 	  return [addVectors(vectorContributions), t + .003];
 	};
 	
-	module.exports = [haaFirstStroke, haaSwoop];
+	module.exports = [[haaFirstStroke], [haaSwoop]];
 
 
 /***/ },
@@ -488,7 +546,7 @@
 	  return [addVectors(vectorContributions), t + .003];
 	}
 	
-	module.exports = [haaFirstStroke, haaLoop, haaLastStroke];
+	module.exports = [[[-40, -60], haaFirstStroke], [haaLoop], [haaLastStroke]];
 
 
 /***/ },
@@ -519,11 +577,8 @@
 	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
 	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
 	
-	  if(t + .003 > 1) {
-	    return [[-60,10], t + .003];
-	  } else {
-	    return [addVectors(vectorContributions), t + .003];
-	  }
+	
+	  return [addVectors(vectorContributions), t + .003];
 	}
 	
 	function tiltedAlif(t) {
@@ -538,7 +593,7 @@
 	  return [addVectors(vectorContributions), t + .003];
 	}
 	
-	module.exports = [laamStart, laamEnd, tiltedAlif];
+	module.exports = [[laamStart], [laamEnd, [0, -125]], [tiltedAlif, [-80, 0]]];
 
 
 /***/ },
@@ -546,14 +601,255 @@
 /***/ function(module, exports) {
 
 	function alif(t) {
-	  if(t + .003 <= 1) {
-	    return [[0, t * 125], t + .003];
-	  } else {
-	    return [[-80, 60], t + .003];
-	  }
+	  return [[0, t * 125], t + .003];
 	}
 	
-	module.exports = [alif];
+	module.exports = [[alif, [-40, 0]]];
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var VectorUtils = __webpack_require__(5),
+	    scaleVector = VectorUtils.scaleVector,
+	    addVectors = VectorUtils.addVectors,
+	    i3jam = __webpack_require__(12);
+	
+	function nunSwoop(t) {
+	  var vectorContributions = [];
+	  var ctrlPts = [[0,0],[35,105],[-125,100],[-90,0]];
+	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
+	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
+	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
+	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
+	
+	  return [addVectors(vectorContributions), t + .003];
+	}
+	
+	module.exports = [[[0,-40], nunSwoop], [[40,-15], i3jam]];
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	module.exports = function (t) {
+	  return [[18 * t, 18 * t], t + .033];
+	};
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var fatHa = __webpack_require__(14)[0][1];
+	
+	module.exports = [[[35, -130], fatHa], [[0, -12], fatHa, [-35, 150]]];
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	function fatHa(t) {
+	  return [[0,1], t + .6];
+	}
+	
+	module.exports = [[[-35, -130], fatHa, [35, 129]]];
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var VectorUtils = __webpack_require__(5),
+	    scaleVector = VectorUtils.scaleVector,
+	    addVectors = VectorUtils.addVectors;
+	
+	function waawStart(t) {
+	  var vectorContributions = [];
+	  var ctrlPts = [[0,0],[-70,-10],[-40,-70],[2,-23]];
+	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
+	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
+	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
+	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
+	
+	  return [addVectors(vectorContributions), t + .003];
+	}
+	
+	function waawEnd(t) {
+	  var vectorContributions = [];
+	  var ctrlPts = [[0,0],[11,21],[-28,108],[-96,80]];
+	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
+	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
+	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
+	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
+	
+	  return [addVectors(vectorContributions), t + .003];
+	}
+	
+	module.exports = [[waawStart], [waawEnd, [0, -57]]];
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	function space(t) {
+	  return [[-50, 0], 1.01];
+	}
+	
+	module.exports = [[space]];
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var VectorUtils = __webpack_require__(5),
+	    scaleVector = VectorUtils.scaleVector,
+	    addVectors = VectorUtils.addVectors;
+	
+	function firstSwoop(t) {
+	  var vectorContributions = [];
+	  var ctrlPts = [[0,0],[7,47],[-31,45],[-29,8]];
+	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
+	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
+	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
+	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
+	
+	  return [addVectors(vectorContributions), t + .003];
+	}
+	
+	function secondSwoop(t) {
+	  var vectorContributions = [];
+	  var ctrlPts = [[0,0],[3,40],[-40,47],[-33,1]];
+	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
+	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
+	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
+	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
+	
+	  return [addVectors(vectorContributions), t + .003];
+	}
+	
+	function finalSwoop(t) {
+	  var vectorContributions = [];
+	  var ctrlPts = [[0,0],[7,110],[-98,120],[-88,40]];
+	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
+	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
+	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
+	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
+	
+	  return [addVectors(vectorContributions), t + .003];
+	}
+	
+	module.exports = [[[0,-40], firstSwoop], [secondSwoop], [finalSwoop]];
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var VectorUtils = __webpack_require__(5),
+	    scaleVector = VectorUtils.scaleVector,
+	    addVectors = VectorUtils.addVectors;
+	
+	function firstSwoop(t) {
+	  var vectorContributions = [];
+	  var ctrlPts = [[0,0],[7,47],[-31,45],[-29,8]];
+	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
+	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
+	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
+	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
+	
+	  return [addVectors(vectorContributions), t + .003];
+	}
+	
+	function secondSwoop(t) {
+	  var vectorContributions = [];
+	  var ctrlPts = [[0,0],[3,40],[-40,47],[-33,1]];
+	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
+	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
+	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
+	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
+	
+	  return [addVectors(vectorContributions), t + .003];
+	}
+	
+	function connector(t) {
+	  var vectorContributions = [];
+	  var ctrlPts = [[0,0],[3,31],[-20,35],[-30,31]];
+	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
+	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
+	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
+	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
+	
+	  return [addVectors(vectorContributions), t + .003];
+	}
+	
+	module.exports = [[[0,-40], firstSwoop], [secondSwoop], [connector]];
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var VectorUtils = __webpack_require__(5),
+	    scaleVector = VectorUtils.scaleVector,
+	    addVectors = VectorUtils.addVectors,
+	    runway = __webpack_require__(20)(30);
+	
+	function haaFirstStroke(t) {
+	  var vectorContributions = [];
+	  var ctrlPts = [[0,0],[-48,-39],[11,-114],[23,-35]];
+	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
+	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
+	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
+	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
+	
+	  // If called at 10ms intervals, each parameterized chunk requires 1s
+	  return [addVectors(vectorContributions), t + .003];
+	}
+	
+	function haaLoop(t) {
+	  var vectorContributions = [];
+	  var ctrlPts = [[0,0],[-19,36],[-73,79],[-24,97]];
+	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
+	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
+	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
+	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
+	
+	  // If called at 10ms intervals, each parameterized chunk requires 1s
+	  return [addVectors(vectorContributions), t + .003];
+	}
+	
+	function haaLastStroke(t) {
+	  var vectorContributions = [];
+	  var ctrlPts = [[0,0],[27,-10],[34,-73],[-37,-62]];
+	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
+	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
+	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
+	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
+	
+	  // If called at 10ms intervals, each parameterized chunk requires 1s
+	  return [addVectors(vectorContributions), t + .003];
+	}
+	
+	module.exports = [[runway], [haaFirstStroke], [haaLoop], [haaLastStroke]];
+
+
+/***/ },
+/* 20 */
+/***/ function(module, exports) {
+
+	module.exports = function(length) {
+	  function runway(t) {
+	    return [[-length * t, 0], t + 1 / length];
+	  }
+	
+	  return runway;
+	};
 
 
 /***/ }

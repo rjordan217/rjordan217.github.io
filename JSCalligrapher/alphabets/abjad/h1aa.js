@@ -26,4 +26,4 @@ var haaSwoop = function(t) {
   return [addVectors(vectorContributions), t + .003];
 };
 
-module.exports = [haaFirstStroke, haaSwoop];
+module.exports = [[haaFirstStroke], [haaSwoop]];
