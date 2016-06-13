@@ -1,0 +1,32 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+canvas {
+  margin: 0;
+  padding: 0;
+}
+
+#slider-container {
+  z-index: 1;
+  position: fixed;
+  margin: 0;
+  padding: 0;
+  bottom: 5px;
+  right: 10px;
+  border-radius: 5px;
+  background-color: lightblue;
+  width: 100px;
+  height: 20px;
+}
+
+#slider-button {
+  z-index: 2;
+  cursor: pointer;
+  margin: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: navy;
+}

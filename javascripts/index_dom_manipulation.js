@@ -126,7 +126,39 @@ module, and having the methods of that module return objects of a new Relation \
 class that would only evaluate SQL queries when absolutely necessary. \
 Optimizations such as this reduce bottlenecks in the server request/response \
 cycle and are crucial for high-quality production-level web servers. I hope to \
-work on similar backend projects in the future!</p>"
+work on similar backend projects in the future!</p>",
+  "<h2>JavaScript Calligrapher (In Progress)</h2><hr>\
+<p>My JavaScript Calligrapher is a pet project that I hope to expand into \
+a full-fledged language-learning app. This tool is meant to take away one of \
+the many challenges I have faced in trying to learn languages on my own: <strong>\
+How do I write the letters and characters?!</strong> For now, the primary alphabet \
+in my library is Arabic, but I am adding optimizations to both shrink the size of \
+calligrapher letter files, and also to allow quick and easy generation of any number \
+of calligraphic shapes. When I expand the project into a full app, the user will \
+be able to generate and save any number of her own dynamically drawn characters.</p>\
+<p>The JSCalligrapher is another solo project that I believe has a lot of promise \
+for future expansion. When I expand this project into a language app, I will \
+likely onboard a few friends to help make this dream a reality. Nothing compares \
+to the excitement and satisfaction I feel when learning a new language and using \
+it to connect with diverse people with very different experiences than my own. \
+This is a feeling that I want to share with the whole world, and I know it can \
+make this world a better, more understanding place!</p>",
+  "<h2>Mandelbrot Visualizer (In Progress)</h2><hr>\
+<p>The Mandelbrot generator is a project I would like to dedicate to all my fellow \
+math enthusiasts out there. Even non-mathematically inclined people must marvel at the \
+beauty of this amazing fractal set. The definition of the Mandelbrot is actually \
+quite simple, though the final product is so complex. The <a href=\
+'https://en.wikipedia.org/wiki/Mandelbrot_set' title='More information here'>\
+Mandelbrot set</a> is made up of all points in the complex plane <i>c</i> for \
+which the image of the complex function <i>f(z) = z</i><sup>2</sup> + <i>c</i>, \
+when applied iteratively starting with <i>z</i> = 0, remains bounded (i.e., does \
+not escape to infinity).</p><p>The Mandelbrot project actually began as a speed \
+programming challenge that I gave myself, so I implemented the basic image generator \
+in 30 minutes. After this, I took a bit of time to optimize the render speed by \
+hard-coding in the main cardioid and disc portions of the image, since the rendering \
+function takes longest to loop through its calculations on pixels inside the \
+Mandelbrot. The next most immediate features I hope to add to this project are \
+zoom functionality and a Julia set generator in a side-window.</p>"
 ];
 
 // var $projectDesc = $("<div class='project-description'>\
