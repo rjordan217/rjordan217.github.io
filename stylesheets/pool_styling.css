@@ -223,6 +223,20 @@ button {
   border-radius: 20px;
 }
 
+.help-button {
+  z-index: 1;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 30px;
+  font-weight: bold;
+  color: rgba(235,176,61,.75);
+}
+
+.help-button:hover {
+  color: rgba(235,176,61,1);
+}
+
 .scoreboard {
   z-index: 1;
   background: #E6B23C; /* For browsers that do not support gradients */

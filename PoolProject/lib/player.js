@@ -10,10 +10,12 @@ Player.prototype.sinkBall = function (ball, gameOverCB) {
   if(ball.number === this.nextBallNumber) {
     this.points++;
     if(ball.number === 9) this.game.gameOver();
+    return true;
   } else if (ball.number === 9) {
     this.points = 0;
     this.game.gameLost();
   }
+  return false;
 };
 
 Player.prototype.updateNextBall = function (nextNumber) {

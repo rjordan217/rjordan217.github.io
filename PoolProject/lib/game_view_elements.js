@@ -3,6 +3,7 @@ var GameViewElements = {
   scoreboard: '<div class="scoreboard"></div>',
   overlay: '<div class="overlay"></div>',
   backButton: '<button class="back-button">◀</button>',
+  helpButton: '<button class="help-button">?</button>',
   startPrompt: {
     container: '<ul class="start-prompt"><h1>9 Ball Pool</h1></ul>',
     twoPlayerStart: '<li id="start-two-game">Start 2P Game</li>',
@@ -19,11 +20,9 @@ var GameViewElements = {
    -  To get points for sinking a ball, the cueball must strike it first that turn.<br>\
    -  Sinking the 9 ball before all other balls have been sunk results in immediate loss.<br><br>\
 Controls: <br>\
-  -  Reposition Cuestick: move cursor or use arrow keys when mouse stationary for \
-more precision.<br>\
-  -  Draw Back Cuestick: click and hold<br>\
-  -  Reset Cuestick: double click<br>\
-  -  Fire Cuestick: press *space*<br>\
+  -  Reposition Cuestick: move cursor around cueball<br>\
+  -  Draw Back Cuestick: click, hold, and drag back<br>\
+  -  Fire Cuestick: release cursor<br>\
   <span class="center">***</span></p>\
     </div>'
   },

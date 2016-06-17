@@ -121,7 +121,7 @@ middleware, as well as some customized middleware that I built to do things \
 like render server error messages with a helpful stack trace and format \
 responses with non-HTML content. Just one of the challenges I really enjoyed \
 in this project was optimizing my model base class (SQLObject) to implement \
-stackable, lazy-loading queries. I did this breaking existing query code into \
+stackable, lazy-loading queries. I did this by breaking existing query code into \
 module, and having the methods of that module return objects of a new Relation \
 class that would only evaluate SQL queries when absolutely necessary. \
 Optimizations such as this reduce bottlenecks in the server request/response \

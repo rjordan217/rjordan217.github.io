@@ -109,26 +109,8 @@
 	    $startPrompt.append($nameForm);
 	  }
 	
-	  function getInstructions(e) {
-	    e.preventDefault();
-	
-	    var $instructions = $(promptEls.instructions),
-	        $backButton = $(GameViewElements.backButton);
-	
-	    $backButton.on("click", function(e) {
-	      e.preventDefault();
-	      $startPrompt.remove();
-	      this.startPrompt();
-	    }.bind(this));
-	
-	    $instructions.prepend($backButton);
-	
-	    $startPrompt.empty();
-	    $startPrompt.append($instructions);
-	  }
-	
 	  $twoP.on("click", getNames.bind(this));
-	  $clickForInstr.on("click", getInstructions.bind(this));
+	  $clickForInstr.on("click", this.showInstructions.bind(this, $startPrompt, true));
 	
 	  $startPrompt.append($twoP),
 	  $startPrompt.append($clickForInstr);
@@ -152,17 +134,65 @@
 	GameView.prototype.startGame = function () {
 	  $('.start-prompt').remove();
 	  this.$overlay.remove();
+	
+	  this.addHelpButton();
+	
 	  this.game.addPlayers(this.playerNames);
 	  this.game.startGame();
 	};
 	
-	GameView.prototype.displayScore = function (player1Score, player2Score) {
+	GameView.prototype.addHelpButton = function () {
+	  var $container = $(GameViewElements.startPrompt.container),
+	      $helpButton = $(GameViewElements.helpButton);
+	
+	  $helpButton.on("mousedown", function(e) {
+	    e.stopPropagation();
+	    this.game.disableCuestick();
+	    this.$poolGame.append(this.$overlay);
+	    this.showInstructions($container, false, e);
+	    this.$poolGame.append($container);
+	  }.bind(this));
+	
+	  this.$poolGame.append($helpButton);
+	};
+	
+	GameView.prototype.showInstructions = function ($container, fromStartPrompt, e) {
+	  e.preventDefault();
+	
+	  var $instructions = $(GameViewElements.startPrompt.instructions),
+	      $backButton = $(GameViewElements.backButton);
+	
+	  $backButton.on("click", function(e) {
+	    e.preventDefault();
+	    $container.remove();
+	    if(fromStartPrompt) {
+	      this.startPrompt();
+	    } else {
+	      this.$overlay.remove();
+	      this.game.enableCuestick();
+	    }
+	  }.bind(this));
+	
+	  $instructions.prepend($backButton);
+	
+	  $container.empty();
+	  $container.append($instructions);
+	};
+	
+	GameView.prototype.displayScore = function (player1Score, player2Score, currentPlayer) {
 	  function firstName(fullName) {
 	    return fullName.match(/\w+/)[0];
 	  }
+	
+	  var firstIsCurrent = (0 == currentPlayer),
+	      secIsCurrent = !firstIsCurrent;
+	
+	  var scoresAndCurrentPlayer = (firstIsCurrent ? "▶ " : "") +
+	    firstName(this.playerNames[0]) + ": " + player1Score + "<br>" +
+	    (secIsCurrent ? "▶ " : "") + firstName(this.playerNames[1]) + ": " + player2Score;
+	
 	  this.$scoreboard.html(
-	    "<h3>Scores</h3><p>" + firstName(this.playerNames[0]) + ": " +
-	    player1Score + "<br>" + firstName(this.playerNames[1]) + ": " + player2Score
+	    "<h3>Scores</h3><p>" + scoresAndCurrentPlayer + "</p>"
 	  );
 	  this.$poolGame.append(this.$scoreboard);
 	};
@@ -208,6 +238,7 @@
 	  scoreboard: '<div class="scoreboard"></div>',
 	  overlay: '<div class="overlay"></div>',
 	  backButton: '<button class="back-button">◀</button>',
+	  helpButton: '<button class="help-button">?</button>',
 	  startPrompt: {
 	    container: '<ul class="start-prompt"><h1>9 Ball Pool</h1></ul>',
 	    twoPlayerStart: '<li id="start-two-game">Start 2P Game</li>',
@@ -224,11 +255,9 @@
 	   -  To get points for sinking a ball, the cueball must strike it first that turn.<br>\
 	   -  Sinking the 9 ball before all other balls have been sunk results in immediate loss.<br><br>\
 	Controls: <br>\
-	  -  Reposition Cuestick: move cursor or use arrow keys when mouse stationary for \
-	more precision.<br>\
-	  -  Draw Back Cuestick: click and hold<br>\
-	  -  Reset Cuestick: double click<br>\
-	  -  Fire Cuestick: press *space*<br>\
+	  -  Reposition Cuestick: move cursor around cueball<br>\
+	  -  Draw Back Cuestick: click, hold, and drag back<br>\
+	  -  Fire Cuestick: release cursor<br>\
 	  <span class="center">***</span></p>\
 	    </div>'
 	  },
@@ -317,11 +346,14 @@
 	  var samePlayer = this.currentPlayer;
 	  var drawTable = this.drawTable.bind(this);
 	  var toClear;
+	  var playsAgain = false;
+	  var forceTurnChange;
+	
 	  function callback() {
 	    cancelAnimationFrame(toClear);
-	    self.currentPlayer = (self.currentPlayer + 1) % 2;
 	    var ballArray = self.ballArray;
 	    var holeArray = self.holeArray;
+	
 	    if (anyAreMobile) {
 	      var sunkArray = [];
 	      anyAreMobile = 0;
@@ -336,31 +368,33 @@
 	        ball.ensurePointCollision(ballArray);
 	      });
 	      var offset = 0;
-	      var playsAgain = true;
 	      sunkArray.forEach(function(ballObj) {
 	        if(ballObj.index === 0) {
-	          self.cueball.pos = [ DIM_X / 2 + REL_DIM / 2, DIM_Y / 2 ];
-	          self.cueball.isSunk = false;
-	          self.currentPlayer = (self.currentPlayer + 1) % 2;
-	          playsAgain = false;
+	          forceTurnChange = true;
 	        } else {
 	          self.ballArray.splice(ballObj.index - offset, 1);
 	          self.sunkBalls.push(ballObj.ball);
-	          self.players[samePlayer].sinkBall(ballObj.ball);
-	          if(playsAgain) self.currentPlayer = samePlayer;
+	          playsAgain = self.players[samePlayer].sinkBall(ballObj.ball) || playsAgain;
 	          offset++;
 	        }
 	        self.updateScore();
 	        self.updateNextTarget();
 	      });
 	      toClear = requestAnimationFrame(function() {
+	        self.updateScore();
 	        drawTable();
 	        callback();
 	      });
 	    } else {
 	      toClear = requestAnimationFrame(function() {
+	        if (forceTurnChange) {
+	          self.cueball.pos = [ DIM_X / 2 + REL_DIM / 2, DIM_Y / 2 ];
+	          self.cueball.isSunk = false;
+	        }
+	        if(!playsAgain || forceTurnChange) self.currentPlayer = (self.currentPlayer + 1) % 2;
 	        drawTable();
 	        self.startTurn();
+	        self.updateScore();
 	      });
 	    }
 	  }
@@ -373,7 +407,7 @@
 	};
 	
 	Game.prototype.updateScore = function () {
-	  this.scoreCB(this.players[0].points, this.players[1].points);
+	  this.scoreCB(this.players[0].points, this.players[1].points, this.currentPlayer);
 	};
 	
 	Game.prototype.calculateWinner = function () {
@@ -384,15 +418,23 @@
 	  return (currentsPoints >= othersPoints ? this.currentPlayer : otherPlayerIdx);
 	};
 	
-	Game.prototype.gameOver = function () {
+	Game.prototype.disableCuestick = function () {
 	  this.cuestick.disabled = true;
+	};
+	
+	Game.prototype.enableCuestick = function () {
+	  this.cuestick.disabled = false;
+	};
+	
+	Game.prototype.gameOver = function () {
+	  this.disableCuestick();
 	  this.cuestick.unbindKeys();
 	  this.drawTable();
 	  this.gameOverCB(this.calculateWinner());
 	};
 	
 	Game.prototype.gameLost = function () {
-	  this.cuestick.disabled = true;
+	  this.disableCuestick();
 	  this.cuestick.unbindKeys();
 	  this.drawTable();
 	  this.gameLostCB(this.currentPlayer);
@@ -465,10 +507,12 @@
 	  if(ball.number === this.nextBallNumber) {
 	    this.points++;
 	    if(ball.number === 9) this.game.gameOver();
+	    return true;
 	  } else if (ball.number === 9) {
 	    this.points = 0;
 	    this.game.gameLost();
 	  }
+	  return false;
 	};
 	
 	Player.prototype.updateNextBall = function (nextNumber) {
@@ -920,6 +964,7 @@
 	  this.angle = 0;
 	  this.drawn = 0;
 	  this.disabled = false;
+	  this.isClicked = false;
 	};
 	
 	Cuestick.prototype.rotate = function (direction) {
@@ -929,7 +974,7 @@
 	Cuestick.prototype.drawBack = function (direction) {
 	  if(this.drawn <= 0 && direction === -1) {
 	    this.drawn = 0;
-	  } else if (this.drawn <= 100) {
+	  } else if (this.drawn <= 150) {
 	    this.drawn += 1 * direction;
 	  }
 	};
@@ -961,54 +1006,17 @@
 	  this.drawn = 0;
 	};
 	
-	Cuestick.prototype.keyBinder = function (renderCB, turnCB, e) {
-	  e.preventDefault();
-	  if(!this.disabled) {
-	    switch (e.keyCode) {
-	      case 40:
-	        this.drawBack(1);
-	        renderCB();
-	        break;
-	      case 38:
-	        this.drawBack(-1);
-	        renderCB();
-	        break;
-	      case 37:
-	        this.rotate(1);
-	        renderCB();
-	        break;
-	      case 39:
-	        this.rotate(-1);
-	        renderCB();
-	        break;
-	      case 32:
-	        this.fire(renderCB, turnCB);
-	        break;
-	    }
-	  }
-	};
-	
 	Cuestick.prototype.clickedBinder = function (renderCB, e) {
 	  e.preventDefault();
 	  if(!this.disabled) {
-	    this.clickedFunc = setInterval(function() {
-	      this.drawBack(1);
-	      renderCB();
-	    }.bind(this),25)
+	    this.isClicked = true;
 	  }
 	};
 	
-	Cuestick.prototype.unclickedBinder = function (e) {
+	Cuestick.prototype.unclickedBinder = function (renderCB, turnCB, e) {
 	  e.preventDefault();
-	  clearInterval(this.clickedFunc);
-	};
-	
-	Cuestick.prototype.doubleClickBinder = function (renderCB, e) {
-	  e.preventDefault();
-	  if(!this.disabled) {
-	    this.resetDrawn();
-	    renderCB();
-	  }
+	  if (!this.disabled && this.isClicked) this.fire(renderCB, turnCB);
+	  this.isClicked = false;
 	};
 	
 	Cuestick.prototype.hoverBinder = function (renderCB, e) {
@@ -1016,17 +1024,19 @@
 	    var mousePos = GET_MOUSE_POS(e);
 	    var radial = VectorUtils.radialOf(this.centeredOn, mousePos);
 	    this.angle = VectorUtils.directionOf(radial);
+	    if (this.isClicked) {
+	      var drawAmt = VectorUtils.magnitudeOf(radial) / 2;
+	      if (drawAmt < 150) {
+	        this.drawn = drawAmt;
+	      } else {
+	        this.drawn = 150;
+	      }
+	    }
 	    renderCB();
 	  }
 	};
 	
 	Cuestick.prototype.bindKeys = function (renderCB, turnCB) {
-	  this.keydownListener = this.keyBinder.bind(this,renderCB,turnCB);
-	  document.addEventListener(
-	    "keydown",
-	    this.keydownListener,
-	    true
-	  );
 	
 	  this.mousedownListener = this.clickedBinder.bind(this, renderCB);
 	  document.addEventListener(
@@ -1035,7 +1045,7 @@
 	    true
 	  );
 	
-	  this.mouseupListener = this.unclickedBinder.bind(this);
+	  this.mouseupListener = this.unclickedBinder.bind(this, renderCB, turnCB);
 	  document.addEventListener(
 	    "mouseup",
 	    this.mouseupListener,
@@ -1048,21 +1058,12 @@
 	    this.mousemoveListener,
 	    true
 	  );
-	
-	  this.dblclickListener = this.doubleClickBinder.bind(this, renderCB);
-	  document.addEventListener(
-	    "dblclick",
-	    this.dblclickListener,
-	    true
-	  );
 	};
 	
 	Cuestick.prototype.unbindKeys = function () {
-	  document.removeEventListener("keydown", this.keydownListener, true);
 	  document.removeEventListener("mousedown", this.mousedownListener, true);
 	  document.removeEventListener("mouseup", this.mouseupListener, true);
 	  document.removeEventListener("mousemove", this.mousemoveListener, true);
-	  document.removeEventListener("dblclick", this.dblclickListener, true);
 	};
 	
 	Cuestick.prototype.updateCueball = function (newCueball) {

@@ -71,11 +71,14 @@ Game.prototype.runTurn = function () {
   var samePlayer = this.currentPlayer;
   var drawTable = this.drawTable.bind(this);
   var toClear;
+  var playsAgain = false;
+  var forceTurnChange;
+
   function callback() {
     cancelAnimationFrame(toClear);
-    self.currentPlayer = (self.currentPlayer + 1) % 2;
     var ballArray = self.ballArray;
     var holeArray = self.holeArray;
+
     if (anyAreMobile) {
       var sunkArray = [];
       anyAreMobile = 0;
@@ -90,31 +93,33 @@ Game.prototype.runTurn = function () {
         ball.ensurePointCollision(ballArray);
       });
       var offset = 0;
-      var playsAgain = true;
       sunkArray.forEach(function(ballObj) {
         if(ballObj.index === 0) {
-          self.cueball.pos = [ DIM_X / 2 + REL_DIM / 2, DIM_Y / 2 ];
-          self.cueball.isSunk = false;
-          self.currentPlayer = (self.currentPlayer + 1) % 2;
-          playsAgain = false;
+          forceTurnChange = true;
         } else {
           self.ballArray.splice(ballObj.index - offset, 1);
           self.sunkBalls.push(ballObj.ball);
-          self.players[samePlayer].sinkBall(ballObj.ball);
-          if(playsAgain) self.currentPlayer = samePlayer;
+          playsAgain = self.players[samePlayer].sinkBall(ballObj.ball) || playsAgain;
           offset++;
         }
         self.updateScore();
         self.updateNextTarget();
       });
       toClear = requestAnimationFrame(function() {
+        self.updateScore();
         drawTable();
         callback();
       });
     } else {
       toClear = requestAnimationFrame(function() {
+        if (forceTurnChange) {
+          self.cueball.pos = [ DIM_X / 2 + REL_DIM / 2, DIM_Y / 2 ];
+          self.cueball.isSunk = false;
+        }
+        if(!playsAgain || forceTurnChange) self.currentPlayer = (self.currentPlayer + 1) % 2;
         drawTable();
         self.startTurn();
+        self.updateScore();
       });
     }
   }
@@ -127,7 +132,7 @@ Game.prototype.updateNextTarget = function () {
 };
 
 Game.prototype.updateScore = function () {
-  this.scoreCB(this.players[0].points, this.players[1].points);
+  this.scoreCB(this.players[0].points, this.players[1].points, this.currentPlayer);
 };
 
 Game.prototype.calculateWinner = function () {
@@ -138,15 +143,23 @@ Game.prototype.calculateWinner = function () {
   return (currentsPoints >= othersPoints ? this.currentPlayer : otherPlayerIdx);
 };
 
-Game.prototype.gameOver = function () {
+Game.prototype.disableCuestick = function () {
   this.cuestick.disabled = true;
+};
+
+Game.prototype.enableCuestick = function () {
+  this.cuestick.disabled = false;
+};
+
+Game.prototype.gameOver = function () {
+  this.disableCuestick();
   this.cuestick.unbindKeys();
   this.drawTable();
   this.gameOverCB(this.calculateWinner());
 };
 
 Game.prototype.gameLost = function () {
-  this.cuestick.disabled = true;
+  this.disableCuestick();
   this.cuestick.unbindKeys();
   this.drawTable();
   this.gameLostCB(this.currentPlayer);

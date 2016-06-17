@@ -6,6 +6,7 @@ var Cuestick = function(cueball) {
   this.angle = 0;
   this.drawn = 0;
   this.disabled = false;
+  this.isClicked = false;
 };
 
 Cuestick.prototype.rotate = function (direction) {
@@ -15,7 +16,7 @@ Cuestick.prototype.rotate = function (direction) {
 Cuestick.prototype.drawBack = function (direction) {
   if(this.drawn <= 0 && direction === -1) {
     this.drawn = 0;
-  } else if (this.drawn <= 100) {
+  } else if (this.drawn <= 150) {
     this.drawn += 1 * direction;
   }
 };
@@ -47,54 +48,17 @@ Cuestick.prototype.resetDrawn = function () {
   this.drawn = 0;
 };
 
-Cuestick.prototype.keyBinder = function (renderCB, turnCB, e) {
-  e.preventDefault();
-  if(!this.disabled) {
-    switch (e.keyCode) {
-      case 40:
-        this.drawBack(1);
-        renderCB();
-        break;
-      case 38:
-        this.drawBack(-1);
-        renderCB();
-        break;
-      case 37:
-        this.rotate(1);
-        renderCB();
-        break;
-      case 39:
-        this.rotate(-1);
-        renderCB();
-        break;
-      case 32:
-        this.fire(renderCB, turnCB);
-        break;
-    }
-  }
-};
-
 Cuestick.prototype.clickedBinder = function (renderCB, e) {
   e.preventDefault();
   if(!this.disabled) {
-    this.clickedFunc = setInterval(function() {
-      this.drawBack(1);
-      renderCB();
-    }.bind(this),25)
+    this.isClicked = true;
   }
 };
 
-Cuestick.prototype.unclickedBinder = function (e) {
+Cuestick.prototype.unclickedBinder = function (renderCB, turnCB, e) {
   e.preventDefault();
-  clearInterval(this.clickedFunc);
-};
-
-Cuestick.prototype.doubleClickBinder = function (renderCB, e) {
-  e.preventDefault();
-  if(!this.disabled) {
-    this.resetDrawn();
-    renderCB();
-  }
+  if (!this.disabled && this.isClicked) this.fire(renderCB, turnCB);
+  this.isClicked = false;
 };
 
 Cuestick.prototype.hoverBinder = function (renderCB, e) {
@@ -102,17 +66,19 @@ Cuestick.prototype.hoverBinder = function (renderCB, e) {
     var mousePos = GET_MOUSE_POS(e);
     var radial = VectorUtils.radialOf(this.centeredOn, mousePos);
     this.angle = VectorUtils.directionOf(radial);
+    if (this.isClicked) {
+      var drawAmt = VectorUtils.magnitudeOf(radial) / 2;
+      if (drawAmt < 150) {
+        this.drawn = drawAmt;
+      } else {
+        this.drawn = 150;
+      }
+    }
     renderCB();
   }
 };
 
 Cuestick.prototype.bindKeys = function (renderCB, turnCB) {
-  this.keydownListener = this.keyBinder.bind(this,renderCB,turnCB);
-  document.addEventListener(
-    "keydown",
-    this.keydownListener,
-    true
-  );
 
   this.mousedownListener = this.clickedBinder.bind(this, renderCB);
   document.addEventListener(
@@ -121,7 +87,7 @@ Cuestick.prototype.bindKeys = function (renderCB, turnCB) {
     true
   );
 
-  this.mouseupListener = this.unclickedBinder.bind(this);
+  this.mouseupListener = this.unclickedBinder.bind(this, renderCB, turnCB);
   document.addEventListener(
     "mouseup",
     this.mouseupListener,
@@ -134,21 +100,12 @@ Cuestick.prototype.bindKeys = function (renderCB, turnCB) {
     this.mousemoveListener,
     true
   );
-
-  this.dblclickListener = this.doubleClickBinder.bind(this, renderCB);
-  document.addEventListener(
-    "dblclick",
-    this.dblclickListener,
-    true
-  );
 };
 
 Cuestick.prototype.unbindKeys = function () {
-  document.removeEventListener("keydown", this.keydownListener, true);
   document.removeEventListener("mousedown", this.mousedownListener, true);
   document.removeEventListener("mouseup", this.mouseupListener, true);
   document.removeEventListener("mousemove", this.mousemoveListener, true);
-  document.removeEventListener("dblclick", this.dblclickListener, true);
 };
 
 Cuestick.prototype.updateCueball = function (newCueball) {

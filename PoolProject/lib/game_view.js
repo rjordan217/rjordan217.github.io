@@ -49,26 +49,8 @@ GameView.prototype.startPrompt = function () {
     $startPrompt.append($nameForm);
   }
 
-  function getInstructions(e) {
-    e.preventDefault();
-
-    var $instructions = $(promptEls.instructions),
-        $backButton = $(GameViewElements.backButton);
-
-    $backButton.on("click", function(e) {
-      e.preventDefault();
-      $startPrompt.remove();
-      this.startPrompt();
-    }.bind(this));
-
-    $instructions.prepend($backButton);
-
-    $startPrompt.empty();
-    $startPrompt.append($instructions);
-  }
-
   $twoP.on("click", getNames.bind(this));
-  $clickForInstr.on("click", getInstructions.bind(this));
+  $clickForInstr.on("click", this.showInstructions.bind(this, $startPrompt, true));
 
   $startPrompt.append($twoP),
   $startPrompt.append($clickForInstr);
@@ -92,17 +74,65 @@ GameView.prototype.submitName = function (e) {
 GameView.prototype.startGame = function () {
   $('.start-prompt').remove();
   this.$overlay.remove();
+
+  this.addHelpButton();
+
   this.game.addPlayers(this.playerNames);
   this.game.startGame();
 };
 
-GameView.prototype.displayScore = function (player1Score, player2Score) {
+GameView.prototype.addHelpButton = function () {
+  var $container = $(GameViewElements.startPrompt.container),
+      $helpButton = $(GameViewElements.helpButton);
+
+  $helpButton.on("mousedown", function(e) {
+    e.stopPropagation();
+    this.game.disableCuestick();
+    this.$poolGame.append(this.$overlay);
+    this.showInstructions($container, false, e);
+    this.$poolGame.append($container);
+  }.bind(this));
+
+  this.$poolGame.append($helpButton);
+};
+
+GameView.prototype.showInstructions = function ($container, fromStartPrompt, e) {
+  e.preventDefault();
+
+  var $instructions = $(GameViewElements.startPrompt.instructions),
+      $backButton = $(GameViewElements.backButton);
+
+  $backButton.on("click", function(e) {
+    e.preventDefault();
+    $container.remove();
+    if(fromStartPrompt) {
+      this.startPrompt();
+    } else {
+      this.$overlay.remove();
+      this.game.enableCuestick();
+    }
+  }.bind(this));
+
+  $instructions.prepend($backButton);
+
+  $container.empty();
+  $container.append($instructions);
+};
+
+GameView.prototype.displayScore = function (player1Score, player2Score, currentPlayer) {
   function firstName(fullName) {
     return fullName.match(/\w+/)[0];
   }
+
+  var firstIsCurrent = (0 == currentPlayer),
+      secIsCurrent = !firstIsCurrent;
+
+  var scoresAndCurrentPlayer = (firstIsCurrent ? "▶ " : "") +
+    firstName(this.playerNames[0]) + ": " + player1Score + "<br>" +
+    (secIsCurrent ? "▶ " : "") + firstName(this.playerNames[1]) + ": " + player2Score;
+
   this.$scoreboard.html(
-    "<h3>Scores</h3><p>" + firstName(this.playerNames[0]) + ": " +
-    player1Score + "<br>" + firstName(this.playerNames[1]) + ": " + player2Score
+    "<h3>Scores</h3><p>" + scoresAndCurrentPlayer + "</p>"
   );
   this.$poolGame.append(this.$scoreboard);
 };
