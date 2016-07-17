@@ -83,9 +83,8 @@ var phrase = Arabic.alif1.concat(
 // canvasEl.parentNode.appendChild(startButton);
 // canvasEl.parentNode.appendChild(stopButton);
 
-setTimeout(function() {
-  ctx.fillStyle = '#E9FBFF';
-  ctx.fillRect(0,0,900,500);
-  ctx.fillStyle = 'black'
-  brush.cgStart(phrase);
-}, 3000);
+
+ctx.fillStyle = '#E9FBFF';
+ctx.fillRect(0,0,900,500);
+ctx.fillStyle = 'black'
+brush.cgStart(phrase);

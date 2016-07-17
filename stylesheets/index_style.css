@@ -307,8 +307,15 @@ p {
 }
 
 #contact {
-  margin-top: 56px;
+  margin-top: 10em;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+footer {
+  margin-top: 10em;
+  margin-bottom: 1em;
+  text-align: center;
+  color: gray;
 }

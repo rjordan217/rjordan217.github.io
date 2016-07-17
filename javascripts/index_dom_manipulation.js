@@ -1,11 +1,11 @@
-function removeOverlay() {
-  var overlay = document.getElementsByClassName('overlay');
-  var underConst = document.getElementsByClassName('under-construction');
-  overlay[0].remove();
-  underConst[0].remove();
-}
-
-setTimeout(removeOverlay, 3000);
+// function removeOverlay() {
+//   var overlay = document.getElementsByClassName('overlay');
+//   var underConst = document.getElementsByClassName('under-construction');
+//   overlay[0].remove();
+//   underConst[0].remove();
+// }
+//
+// setTimeout(removeOverlay, 3000);
 
 
 var optimizedResize = (function() {
@@ -161,41 +161,8 @@ Mandelbrot. The next most immediate features I hope to add to this project are \
 zoom functionality and a Julia set generator in a side-window.</p>"
 ];
 
-// var $projectDesc = $("<div class='project-description'>\
-// <div class='arrow-up'></div>\
-// </div>");
-//
-// var $projContent = $("<div class='project-content'>\
-// <h2>Description: </h2>\
-// </div>");
-//
-// var $projAnchor = $("<div id='proj-desc-anchor'></div>");
-// $projContent.append($projAnchor);
-// $projectDesc.append($projContent);
-//
-// var $projects = $(".projects-flex a");
-// $projects.mouseleave(clearProjectInfo);
-//
-// var clearCallID;
-
 var projAnchor = document.getElementById('proj-desc-anchor');
 
 function displayProjectInfo(idx) {
   projAnchor.innerHTML = PROJECT_DESCRIPTIONS[idx];
-  // $projectDesc.remove();
-  // $projAnchor.html(PROJECT_DESCRIPTIONS[idx]);
-  // $projects.eq(idx).after($projectDesc);
-  // $projectDesc.mouseenter(function() {
-  //   if(clearCallID) clearTimeout(clearCallID);
-  // });
-  // $projectDesc.mouseleave(function() {
-  //   clearProjectInfo();
-  // });
 }
-
-//
-// function clearProjectInfo() {
-//   clearCallID = setTimeout(function() {
-//     $projectDesc.remove();
-//   }, 500);
-// }
