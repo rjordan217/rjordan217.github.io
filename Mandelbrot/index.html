@@ -6,10 +6,18 @@
     <link rel="stylesheet" href="./mandelbrot_styling.css" charset="utf-8">
   </head>
   <body>
-    <canvas id="mandelbrot-canvas" width="1200" height="900"></canvas>
-    <div id="slider-container">
-      <div id="slider-button"></div>
+    <div class="content after">
+      <h2 class="loading">Generating Mandelbrot...</h2>
+      <div class="loading ellipsis-outer" width="1200" height="900">
+        <div class="ellipsis-inner">
+          <div class="ellipsis-dot" id="dot1"></div>
+          <div class="ellipsis-dot" id="dot2"></div>
+          <div class="ellipsis-dot" id="dot3"></div>
+        </div>
+      </div>
+      <canvas id="mandelbrot-canvas" width="1200" height="900"></canvas>
     </div>
+    <script src="../javascripts/jquery-1.12.3.min.js" charset="utf-8"></script>
     <script src="./mandelbrot_bundle.js" charset="utf-8"></script>
   </body>
 </html>

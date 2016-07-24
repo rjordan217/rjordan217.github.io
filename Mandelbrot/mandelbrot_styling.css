@@ -8,25 +8,63 @@ canvas {
   padding: 0;
 }
 
-#slider-container {
-  z-index: 1;
-  position: fixed;
-  margin: 0;
+.content {
+  margin: auto;
   padding: 0;
-  bottom: 5px;
-  right: 10px;
-  border-radius: 5px;
-  background-color: lightblue;
-  width: 100px;
-  height: 20px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 }
 
-#slider-button {
-  z-index: 2;
-  cursor: pointer;
-  margin: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: 10px;
+.group::after {
+  content: "";
+  clear: both;
+  display: block;
+}
+
+.ellipsis-outer {
+  width: 1200px;
+  height: 900px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ellipsis-inner {
+  display: flex;
+  justify-content: space-around;
+  width: 300px;
+}
+
+.ellipsis-dot {
+  width: 50px;
+  height: 50px;
   background-color: navy;
+  opacity: 0;
+  -webkit-animation: fade 3s linear infinite;
+  animation: fade 3s linear infinite;
+}
+
+#dot2 {
+  -webkit-animation-delay: 1s;
+  animation-delay: 1s;
+}
+
+#dot3 {
+  -webkit-animation-delay: 2s;
+  animation-delay: 2s;
+}
+
+#mandelbrot-canvas {
+  display: none;
+}
+
+@-webkit-keyframes fade {
+  0%,100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@keyframes fade {
+  0%,100% {opacity: 0;}
+  50% {opacity: 1;}
 }

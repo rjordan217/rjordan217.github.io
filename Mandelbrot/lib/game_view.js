@@ -1,10 +1,17 @@
-var MandelbrotImage = require('./mandelbrot_image'),
-    ZoomSlider = require('./zoom_slider');
+var MandelbrotImage = require('./mandelbrot_image');
 
 var GameView = function(canvasEl) {
-  this.canvasEl = canvasEl;
+  console.log("Initializing");
+  this.$canvasEl = $(canvasEl);
   this.image = new MandelbrotImage(canvasEl.getContext('2d'));
-  this.slider = new ZoomSlider();
+  console.log(this.image);
+};
+
+GameView.prototype.launch = function() {
+  console.log("Launching");
+  this.image.draw();
+  $('.loading').css("display", "none");
+  this.$canvasEl.css("display","block");
 };
 
 module.exports = GameView;
