@@ -88,26 +88,6 @@ canvas {
   z-index: 10;
 }
 
-.under-construction {
-  position: fixed;
-  z-index: 11;
-  color: white;
-  text-align: center;
-  width: 75vw;
-  margin: auto;
-  padding: 2vw;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  left: 12.5vw;
-  top: 20vh;
-}
-
-.under-construction img {
-  width: 50vw;
-  height: auto;
-}
-
 .name {
   cursor: pointer;
 }
@@ -135,6 +115,41 @@ canvas {
   justify-content: center;
   opacity: .2;
   z-index: -10;
+}
+
+.splash-images {
+  padding-top: 56px;
+  width: 100vw;
+  height: calc(100vh - 56px);
+  background-color: black;
+}
+
+.splash-images > div {
+  width: 46vw;
+  height: 100%;
+  margin: 0 2vw;
+}
+
+.main-splash {
+  float: right;
+  display: flex;
+  align-items: center;
+  background-image: url('../res/with_eyes_the_color_of_water.gif');
+  background-repeat: repeat-y;
+  background-size: 100% auto;
+  opacity: .8;
+}
+
+.second-splash {
+  float: left;
+}
+
+.main-splash img {
+  width: 100%;
+}
+
+.second-splash img {
+  width: 100%;
 }
 
 .welcome {
@@ -306,16 +321,80 @@ p {
   margin-top: 20px;
 }
 
-#contact {
-  margin-top: 10em;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 footer {
   margin-top: 10em;
   margin-bottom: 1em;
   text-align: center;
   color: gray;
+}
+
+.group::after {
+  display: block;
+  clear: both;
+  content: "";
+}
+
+.contact .contact-box {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility .25s, opacity 0.5s linear;
+}
+
+.contact:hover .contact-box {
+  visibility: visible;
+  opacity: 1;
+}
+
+.contact-box {
+  position:absolute;
+  right:20px;
+  top:55px;
+  width: 50px;
+  padding: 5px;
+  background-color:aliceblue;
+  border: 1px solid lightblue;
+  border-radius: 10px;
+}
+
+.icon {
+  float:left;
+  width:50px;
+  height:50px;
+  margin-top: 5px;
+  opacity: .8;
+}
+
+.icon:first-child {
+  margin-top: 0;
+}
+
+.icon:hover {
+  opacity: 1;
+}
+
+.linkedin {
+  background-image: url('../res/linked-in-no-bg.png');
+  background-size: cover;
+}
+
+.email {
+  background-image: url('../res/at_symbol.svg');
+  background-size: cover;
+}
+
+.github {
+  background-image: url('../res/github-no-bg.png');
+  background-size: cover;
+}
+
+.left {
+  margin-left: 0;
+  margin-right: auto;
+  float: left;
+}
+
+.right {
+  margin-right: 0;
+  margin-left: auto;
+  float: right;
 }
