@@ -1,0 +1,18 @@
+/*------------------------------------------------------------------
+
+	ZAP BOX LAYOUT 
+
+-------------------------------------------------------------------*/
+body{
+	background:url(../images/sliders/3/slide-3.jpg) fixed no-repeat;
+	background-size:cover;
+}
+#wrap{
+	width:1250px;
+	margin:0 auto;
+	background:#fff;
+	box-shadow:0 0 20px rgba(0,0,0,0.5);
+}
+.is-sticky .sticky{
+	left:0px;
+}

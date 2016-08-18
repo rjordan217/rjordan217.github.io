@@ -1,0 +1,17 @@
+**index.html**
+--Inside HOME list item--
+<ul class="dropdown">
+  <li><a href="index.html">Main</a></li>
+  <li><a href="main_coporate_1.html">Index Coporate</a></li>
+  <li><a href="main_creative_2.html">Index Creative 2</a></li>
+  <li><a href="main_creative_3.html">Index Creative 3</a></li>
+  <li><a href="main_creative_4.html">Index Creative 4</a></li>
+  <li><a href="main_creative_4_left_nav.html">Index Creative 4 Left Nav</a></li>
+  <li><a href="main_creative_5.html">Index Creative 5</a></li>
+  <li><a href="main_creative_6.html">Index Creative 6</a></li>
+  <li><a href="main_creative_6_left_nav.html">Index Creative 6 Left Nav</a></li>
+  <li><a href="main_shop_1.html">Index Shop 1</a></li>
+  <li><a href="main_shop_2.html">Index Shop 2</a></li>
+  <li><a href="main_shop_3.html">Index Shop 3</a></li>
+  <li><a href="index_loading.html">Index loading Version</a></li>
+</ul>

@@ -1,0 +1,48 @@
+/*------------------------------------------------------------------
+
+COLOR:	SKY BLUE	#00cdcd
+
+-------------------------------------------------------------------*/
+header nav li a:after, .portfolio-overlay:before, .btn.btn-color, #footer .block .block-title:not(.no-underline):before, .no-touch .cd-top:hover, header .ownmenu .megamenu hr, header.coporate-header nav li a:before, header .shop-cart .numb, header .ownmenu .shop-cart ul.dropdown li a.btn, .portfolio-overlay.style-4 .go, .team.style-6 .team-image, .clients .owl-dots .owl-dot.active, .block-instagram-widget a:hover .overlay, .heading-block hr.color, .testimonial.style-6 hr, .blog-post .post-info li .date, .blog.style-2 .date, .social-icons li a:hover, .bx-wrapper .bx-pager.bx-default-pager a:hover, .bx-wrapper .bx-pager.bx-default-pager a.active, .team.style-4 .hover-detail, .list-w-bullets.check li:before, .event-block .dark-border:hover, .pricing .pricing-table.style-2 .btn:hover, .tabs.style-2 li.active a:before, .tabs.style-2 li a:hover:before, .popurlar_product .off-tags, .popurlar_product .items-in .over-item a.btn, .process-style-2 .icon, .heading-side-bar h4:before, .comments .btn, .list-style-featured li:hover .icon, .icon-box.ib-black .ib-icon, .tabs.style-2 li a.active:before, .tabs.style-4 .nav-pills li.active a, .tabs.style-4 .nav-pills li:hover a, .dropcap.dark:first-letter, header .search-nav button, .cost-price-content .noUi-handle-lower, .cost-price-content .noUi-handle-upper, .grand-total .radio input[type="radio"]:checked + label::after {
+	background: #00cdcd !important;
+}
+a:hover, a:focus {
+	color: #00cdcd;
+}
+.text-primary, #footer .text-primary, header .ownmenu ul.dropdown li a:hover, .portfolio-overlay.style-4 .go:hover, .process-style-3 .icon, .accordion-style-2 .panel-default > .panel-heading a, .team.style-5 .hover-detail li a:hover, .portfolio-overlay.style-2 a.go, .team.style-2 .team-small li a i, header .ownmenu li > .megamenu li a:hover {
+	color: #00cdcd !important;
+}
+.portfolio-overlay h3 > a:hover, .portfolio-overlay h3 > a:active, .portfolio-overlay h3 > a.active, .portfolio-overlay h3 > a:focus, .portfolio-overlay span > a:hover, .portfolio-overlay span > a:active, .portfolio-overlay span > a.active, .portfolio-overlay span > a:focus, #footer a:hover, .list-w-icon-small li i, .team.style-4 li:hover .hover-inn:before, .event-block .huge-text, .tabs.style-2 li.active a, .tabs.style-2 li:hover a, .shopping-cart .order-place h5, blockquote cite, .dropcap:first-letter, .stars {
+	color: #00cdcd;
+}
+.contact-form button:hover, .accordion-style-2 .panel-default > .panel-heading .panel-title a:before, .side-bar .tags li a:hover, .pagination>li>a:hover, .shopping-cart .cart-ship-info .grand-total .btn {
+	background: #00cdcd;
+	border-color: #00cdcd;
+}
+.btn {
+	background: #00cdcd;
+}
+.btn.btn-color {
+	background: #00cdcd !important;
+}
+.btn.btn-color:hover {
+	background: #141414 !important;
+}
+.icon-box:hover .ib-icon i, .text-color-primary, .cd-top, .contact-form label, header.coporate-header nav li.active a, header.coporate-header nav li a:hover, .event-block .dark-border, .icon-box .ib-icon i, .list-style-featured .icon, .icon-box.ib-style-5 .ib-info a:hover, .icon-box.ib-style-5 .ib-info a:active, .icon-box.ib-style-5 .ib-info a.active, .icon-box.ib-style-5 .ib-info a:focus {
+	color: #00cdcd;
+}
+header nav li.active a, .tabs li a.active, .testimonial .flex-control-thumbs .flex-active, .cd-top, .portfolio-overlay a.go:hover, .contact.style-3 .contact-form button:hover, .contact.style-3 .contact-form button, .icon-box:hover.ib-bordered.ib-bordered-light .ib-icon, .portfolio-overlay.style-2 a.go, .counter .c-style-2:hover, .icon-box.ib-black:hover .ib-icon, .event-block .dark-border, .counter .c-style-3, .icon-box.ib-bordered.ib-bordered-white:hover .ib-icon, .popurlar_product .items-in .over-item a.btn, .icon-box.ib-bordered.ib-bordered-black .ib-icon, .icon-box.ib-black .ib-icon, .nav-tabs.tabs.style-3 .nav li.active a {
+	border-color: #00cdcd !important;
+}
+header nav li a:after {
+	border-bottom: 2px solid #00cdcd;
+}
+.icon-box.ib-black:hover .ib-icon {
+	background: #fff !important;
+}
+.yellow-pattern, .order-place .btn {
+	background-color: #00cdcd;
+}
+.portfolio-overlay.style-4 .go:hover {
+	color: #fff !important;
+}
