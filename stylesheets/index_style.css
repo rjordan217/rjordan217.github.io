@@ -398,3 +398,9 @@ footer {
   margin-left: auto;
   float: right;
 }
+
+@media only screen and (max-device-width: 480px) {
+  .splash-images {
+    height: calc(40vh - 56px);
+  }
+}

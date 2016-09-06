@@ -1,0 +1,3 @@
+*index.html*
+Change logo image files
+Portfolio, Blog list items
