@@ -1,4 +1,4 @@
-var canvasEl = document.getElementById('canvas');
+var canvasEl = document.getElementById('drawing-canvas');
 var ctx = canvasEl.getContext('2d');
 
 var startPos = [ 7 * canvasEl.width / 8, canvasEl.height / 4];
@@ -11,24 +11,27 @@ GET_MOUSE_POS = function(e) {
   return [ e.clientX - rect.left, e.clientY - rect.top ];
 };
 
-// var bezierTool = new MultipleBeziers(ctx);
-// bezierTool.bindMouse(canvasEl);
-//
-// var addButton = document.createElement("button");
-// addButton.onclick = bezierTool.addBezier.bind(bezierTool);
-// addButton.innerHTML = "Add Bezier";
-// canvasEl.parentNode.appendChild(addButton);
-//
-// var BezierPath = require('./utils/bezier_path');
-//
-// var printFuncButton = document.createElement("button");
-// printFuncButton.onclick = function() {
-//   bezierTool.beziers.forEach(function(bezier) {
-//     console.log(BezierPath(bezier.printRelativeControlPoints()).toString());
-//   });;
-// };
-// printFuncButton.innerHTML = "Print Béziers";
-// canvasEl.parentNode.appendChild(printFuncButton);
+canvasEl = document.getElementById('edit-canvas');
+ctx = canvasEl.getContext('2d');
+
+var bezierTool = new MultipleBeziers(ctx);
+bezierTool.bindMouse(canvasEl);
+
+var addButton = document.createElement("button");
+addButton.onclick = bezierTool.addBezier.bind(bezierTool);
+addButton.innerHTML = "Add Bezier";
+canvasEl.parentNode.appendChild(addButton);
+
+var BezierPath = require('./utils/bezier_path');
+
+var printFuncButton = document.createElement("button");
+printFuncButton.onclick = function() {
+  bezierTool.beziers.forEach(function(bezier) {
+    console.log(BezierPath(bezier.printRelativeControlPoints()).toString());
+  });;
+};
+printFuncButton.innerHTML = "Print Béziers";
+canvasEl.parentNode.appendChild(printFuncButton);
 
 var brush = new Brush(ctx, startPos, 3 * canvasEl.height / 4);
 
