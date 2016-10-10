@@ -1,5 +1,5 @@
-var canvasEl = document.getElementById('drawing-canvas');
-var ctx = canvasEl.getContext('2d');
+var canvasEl = document.getElementById('drawing-canvas'),
+    ctx = canvasEl.getContext('2d');
 
 var startPos = [ 7 * canvasEl.width / 8, canvasEl.height / 4];
 

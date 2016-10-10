@@ -49,45 +49,16 @@
 	
 	var startPos = [ 7 * canvasEl.width / 8, canvasEl.height / 4];
 	
-	var Brush = __webpack_require__(1);
-	var MultipleBeziers = __webpack_require__(3);
+	var Brush = __webpack_require__(1),
+	    MultipleBeziers = __webpack_require__(3),
+	    Arabic = __webpack_require__(5);
 	
 	GET_MOUSE_POS = function(e) {
 	  var rect = canvasEl.getBoundingClientRect();
 	  return [ e.clientX - rect.left, e.clientY - rect.top ];
 	};
 	
-	canvasEl = document.getElementById('edit-canvas');
-	ctx = canvasEl.getContext('2d');
-	
-	var bezierTool = new MultipleBeziers(ctx);
-	bezierTool.bindMouse(canvasEl);
-	
-	var addButton = document.createElement("button");
-	addButton.onclick = bezierTool.addBezier.bind(bezierTool);
-	addButton.innerHTML = "Add Bezier";
-	canvasEl.parentNode.appendChild(addButton);
-	
-	var BezierPath = __webpack_require__(5);
-	
-	var printFuncButton = document.createElement("button");
-	printFuncButton.onclick = function() {
-	  bezierTool.beziers.forEach(function(bezier) {
-	    console.log(BezierPath(bezier.printRelativeControlPoints()).toString());
-	  });;
-	};
-	printFuncButton.innerHTML = "Print Béziers";
-	canvasEl.parentNode.appendChild(printFuncButton);
-	
 	var brush = new Brush(ctx, startPos, 3 * canvasEl.height / 4);
-	
-	var Arabic = __webpack_require__(6);
-	
-	// var startButton = document.createElement("button"),
-	//     stopButton = document.createElement("button");
-	//
-	// startButton.innerHTML = "Start";
-	// stopButton.innerHTML = "Stop";
 	
 	Array.prototype.deepDup = function() {
 	  var duplicate = [];
@@ -122,16 +93,6 @@
 	    )
 	  )
 	);
-	
-	// startButton.onclick = brush.cgStart.bind(
-	//   brush,
-	//   phrase
-	// );
-	// stopButton.onclick = brush.cgStop.bind(brush);
-	//
-	// canvasEl.parentNode.appendChild(startButton);
-	// canvasEl.parentNode.appendChild(stopButton);
-	
 	
 	ctx.fillStyle = '#E9FBFF';
 	ctx.fillRect(0,0,900,500);
@@ -385,46 +346,9 @@
 
 /***/ },
 /* 5 */
-/***/ function(module, exports) {
-
-	var scaleVector = function(k, v) {
-	  return [k * v[0], k * v[1]];
-	};
-	
-	var addVectors = function(rowVectors) {
-	  var sumVector = new Array(rowVectors[0].length);
-	  sumVector.forEach(function(el){return 0;});
-	  rowVectors.forEach(function(vector) {
-	    vector.forEach(function(el, idx) {
-	      sumVector[idx] += el;
-	    });
-	  });
-	  return sumVector;
-	};
-	
-	var BezierPath = function(ctrlPts) {
-	  function parameterizedBezier(t) {
-	    var vectorContributions = [];
-	    vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	    vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	    vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	    vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	    // If called at 10ms intervals, each parameterized chunk requires 1s
-	    return [addVectors(vectorContributions), t + .001];
-	  }
-	
-	  return parameterizedBezier;
-	}
-	
-	module.exports = BezierPath;
-
-
-/***/ },
-/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var BezierPath = __webpack_require__(5);
+	var BezierPath = __webpack_require__(6);
 	
 	module.exports = {
 	  alif1: __webpack_require__(7),
@@ -467,6 +391,43 @@
 	  tanwiin: __webpack_require__(19),
 	  space: __webpack_require__(20)
 	};
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	var scaleVector = function(k, v) {
+	  return [k * v[0], k * v[1]];
+	};
+	
+	var addVectors = function(rowVectors) {
+	  var sumVector = new Array(rowVectors[0].length);
+	  sumVector.forEach(function(el){return 0;});
+	  rowVectors.forEach(function(vector) {
+	    vector.forEach(function(el, idx) {
+	      sumVector[idx] += el;
+	    });
+	  });
+	  return sumVector;
+	};
+	
+	var BezierPath = function(ctrlPts) {
+	  function parameterizedBezier(t) {
+	    var vectorContributions = [];
+	    vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
+	    vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
+	    vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
+	    vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
+	
+	    // If called at 10ms intervals, each parameterized chunk requires 1s
+	    return [addVectors(vectorContributions), t + .001];
+	  }
+	
+	  return parameterizedBezier;
+	}
+	
+	module.exports = BezierPath;
 
 
 /***/ },
@@ -856,4 +817,4 @@
 
 /***/ }
 /******/ ]);
-//# sourceMappingURL=calligrapher_bundle.js.map
+//# sourceMappingURL=calligraphy_demo_bundle.js.map
