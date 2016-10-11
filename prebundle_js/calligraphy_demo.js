@@ -28,25 +28,18 @@ Array.prototype.deepDup = function() {
   return duplicate;
 };
 
-var phrase = Arabic.alif1.concat(
-  Arabic.haa1.concat(
-    Arabic.lamalf23.deepDup().concat(
-      Arabic.tanwiin.deepDup().concat(
-        Arabic.space.concat(
-          Arabic.waaw.concat(
-            Arabic.siin1.concat(
-              Arabic.haa2.concat(
-                Arabic.lamalf23.deepDup().concat(
-                  Arabic.tanwiin.deepDup()
-                )
-              )
-            )
-          )
-        )
-      )
-    )
-  )
-);
+var processLetters = function(alphabet, args) {
+  var fullInstructions = [];
+  for(var i = 0; i < args.length; i++) {
+    fullInstructions = fullInstructions.concat(alphabet[args[i]].deepDup())
+  }
+  return fullInstructions;
+};
+
+var phrase = processLetters(
+  Arabic,
+  ['alif1','haa1','lamalf23','tanwiin','space','waaw','siin1','haa2','lamalf23','tanwiin']
+)
 
 ctx.fillStyle = '#E9FBFF';
 ctx.fillRect(0,0,900,500);

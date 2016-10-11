@@ -74,25 +74,18 @@
 	  return duplicate;
 	};
 	
-	var phrase = Arabic.alif1.concat(
-	  Arabic.haa1.concat(
-	    Arabic.lamalf23.deepDup().concat(
-	      Arabic.tanwiin.deepDup().concat(
-	        Arabic.space.concat(
-	          Arabic.waaw.concat(
-	            Arabic.siin1.concat(
-	              Arabic.haa2.concat(
-	                Arabic.lamalf23.deepDup().concat(
-	                  Arabic.tanwiin.deepDup()
-	                )
-	              )
-	            )
-	          )
-	        )
-	      )
-	    )
-	  )
-	);
+	var processLetters = function(alphabet, args) {
+	  var fullInstructions = [];
+	  for(var i = 0; i < args.length; i++) {
+	    fullInstructions = fullInstructions.concat(alphabet[args[i]].deepDup())
+	  }
+	  return fullInstructions;
+	};
+	
+	var phrase = processLetters(
+	  Arabic,
+	  ['alif1','haa1','lamalf23','tanwiin','space','waaw','siin1','haa2','lamalf23','tanwiin']
+	)
 	
 	ctx.fillStyle = '#E9FBFF';
 	ctx.fillRect(0,0,900,500);
@@ -395,24 +388,14 @@
 
 /***/ },
 /* 6 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	var scaleVector = function(k, v) {
-	  return [k * v[0], k * v[1]];
-	};
+	var VectorUtils = __webpack_require__(2),
+	    scaleVector = VectorUtils.scaleVector,
+	    addVectors = VectorUtils.addVectors;
 	
-	var addVectors = function(rowVectors) {
-	  var sumVector = new Array(rowVectors[0].length);
-	  sumVector.forEach(function(el){return 0;});
-	  rowVectors.forEach(function(vector) {
-	    vector.forEach(function(el, idx) {
-	      sumVector[idx] += el;
-	    });
-	  });
-	  return sumVector;
-	};
-	
-	var BezierPath = function(ctrlPts) {
+	var BezierPath = function(ctrlPts, timeChange) {
+	  timeChange = timeChange || .001;
 	  function parameterizedBezier(t) {
 	    var vectorContributions = [];
 	    vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
@@ -421,7 +404,7 @@
 	    vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
 	
 	    // If called at 10ms intervals, each parameterized chunk requires 1s
-	    return [addVectors(vectorContributions), t + .001];
+	    return [addVectors(vectorContributions), t + timeChange];
 	  }
 	
 	  return parameterizedBezier;
@@ -445,33 +428,10 @@
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(2),
-	    scaleVector = VectorUtils.scaleVector,
-	    addVectors = VectorUtils.addVectors;
+	var BezierPath = __webpack_require__(6);
 	
-	var haaFirstStroke = function(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[2,-19],[25,-12],[134,-15]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  // If called at 10ms intervals, each parameterized chunk requires 1s
-	  return [addVectors(vectorContributions), t + .003];
-	};
-	
-	var haaSwoop = function(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[-263,49],[-102,239],[7,137]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  // If called at 10ms intervals, each parameterized chunk requires 1s
-	  return [addVectors(vectorContributions), t + .003];
-	};
+	var haaFirstStroke = BezierPath([[0,0],[2,-19],[25,-12],[134,-15]], .003),
+	    haaSwoop = BezierPath([[0,0],[-263,49],[-102,239],[7,137]], .003);
 	
 	module.exports = [[haaFirstStroke], [haaSwoop]];
 
@@ -480,42 +440,11 @@
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(2),
-	    scaleVector = VectorUtils.scaleVector,
-	    addVectors = VectorUtils.addVectors;
+	var BezierPath = __webpack_require__(6);
 	
-	function firstSwoop(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[7,47],[-31,45],[-29,8]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  return [addVectors(vectorContributions), t + .003];
-	}
-	
-	function secondSwoop(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[3,40],[-40,47],[-33,1]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  return [addVectors(vectorContributions), t + .003];
-	}
-	
-	function finalSwoop(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[7,110],[-98,120],[-88,40]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  return [addVectors(vectorContributions), t + .003];
-	}
+	var firstSwoop = BezierPath([[0,0],[7,47],[-31,45],[-29,8]], .003),
+	    secondSwoop = BezierPath([[0,0],[3,40],[-40,47],[-33,1]], .003),
+	    finalSwoop = BezierPath([[0,0],[7,110],[-98,120],[-88,40]], .003);
 	
 	module.exports = [[[0,-40], firstSwoop], [secondSwoop], [finalSwoop]];
 
@@ -524,42 +453,11 @@
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(2),
-	    scaleVector = VectorUtils.scaleVector,
-	    addVectors = VectorUtils.addVectors;
+	var BezierPath = __webpack_require__(6);
 	
-	function firstSwoop(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[7,47],[-31,45],[-29,8]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  return [addVectors(vectorContributions), t + .003];
-	}
-	
-	function secondSwoop(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[3,40],[-40,47],[-33,1]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  return [addVectors(vectorContributions), t + .003];
-	}
-	
-	function connector(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[3,31],[-20,35],[-30,31]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  return [addVectors(vectorContributions), t + .003];
-	}
+	var firstSwoop = BezierPath([[0,0],[7,47],[-31,45],[-29,8]], .003),
+	    secondSwoop = BezierPath([[0,0],[3,40],[-40,47],[-33,1]], .003),
+	    connector = BezierPath([[0,0],[3,31],[-20,35],[-30,31]], .003);
 	
 	module.exports = [[[0,-40], firstSwoop], [secondSwoop], [connector]];
 
@@ -568,21 +466,10 @@
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(2),
-	    scaleVector = VectorUtils.scaleVector,
-	    addVectors = VectorUtils.addVectors,
+	var BezierPath = __webpack_require__(6),
 	    i3jam = __webpack_require__(12);
 	
-	function nunSwoop(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[35,105],[-125,100],[-90,0]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  return [addVectors(vectorContributions), t + .003];
-	}
+	var nunSwoop = BezierPath([[0,0],[35,105],[-125,100],[-90,0]], .003);
 	
 	module.exports = [[[0,-40], nunSwoop], [[40,-15], i3jam]];
 
@@ -600,45 +487,11 @@
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(2),
-	    scaleVector = VectorUtils.scaleVector,
-	    addVectors = VectorUtils.addVectors;
+	var BezierPath = __webpack_require__(6);
 	
-	function haaFirstStroke(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[66,30],[50,71],[-22,67]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  // If called at 10ms intervals, each parameterized chunk requires 1s
-	  return [addVectors(vectorContributions), t + .003];
-	}
-	
-	function haaLoop(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[-60,-11],[-15,-84],[27,-42]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  // If called at 10ms intervals, each parameterized chunk requires 1s
-	  return [addVectors(vectorContributions), t + .003];
-	}
-	
-	function haaLastStroke(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[25,41],[-92,46],[-90,45]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  // If called at 10ms intervals, each parameterized chunk requires 1s
-	  return [addVectors(vectorContributions), t + .003];
-	}
+	var haaFirstStroke = BezierPath([[0,0],[66,30],[50,71],[-22,67]], .003),
+	    haaLoop = BezierPath([[0,0],[-60,-11],[-15,-84],[27,-42]], .003),
+	    haaLastStroke = BezierPath([[0,0],[25,41],[-92,46],[-90,45]], .003);
 	
 	module.exports = [[[-40, -60], haaFirstStroke], [haaLoop], [haaLastStroke]];
 
@@ -647,46 +500,12 @@
 /* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(2),
-	    scaleVector = VectorUtils.scaleVector,
-	    addVectors = VectorUtils.addVectors,
+	var BezierPath = __webpack_require__(6),
 	    runway = __webpack_require__(15)(30);
 	
-	function haaFirstStroke(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[-48,-39],[11,-114],[23,-35]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  // If called at 10ms intervals, each parameterized chunk requires 1s
-	  return [addVectors(vectorContributions), t + .003];
-	}
-	
-	function haaLoop(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[-19,36],[-73,79],[-24,97]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  // If called at 10ms intervals, each parameterized chunk requires 1s
-	  return [addVectors(vectorContributions), t + .003];
-	}
-	
-	function haaLastStroke(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[27,-10],[34,-73],[-37,-62]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  // If called at 10ms intervals, each parameterized chunk requires 1s
-	  return [addVectors(vectorContributions), t + .003];
-	}
+	var haaFirstStroke = BezierPath([[0,0],[-48,-39],[11,-114],[23,-35]], .003),
+	    haaLoop = BezierPath([[0,0],[-19,36],[-73,79],[-24,97]], .003),
+	    haaLastStroke = BezierPath([[0,0],[27,-10],[34,-73],[-37,-62]], .003);
 	
 	module.exports = [[runway], [haaFirstStroke], [haaLoop], [haaLastStroke]];
 
@@ -708,32 +527,11 @@
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(2),
-	    scaleVector = VectorUtils.scaleVector,
-	    addVectors = VectorUtils.addVectors;
+	var BezierPath = __webpack_require__(6);
 	
-	function waawStart(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[-70,-10],[-40,-70],[2,-23]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  return [addVectors(vectorContributions), t + .003];
-	}
-	
-	function waawEnd(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[11,21],[-28,108],[-96,80]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  return [addVectors(vectorContributions), t + .003];
-	}
-	
+	var waawStart = BezierPath([[0,0],[-70,-10],[-40,-70],[2,-23]], .003),
+	    waawEnd = BezierPath([[0,0],[11,21],[-28,108],[-96,80]], .003);
+	    
 	module.exports = [[waawStart], [waawEnd, [0, -57]]];
 
 
@@ -741,45 +539,11 @@
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var VectorUtils = __webpack_require__(2),
-	    scaleVector = VectorUtils.scaleVector,
-	    addVectors = VectorUtils.addVectors;
+	var BezierPath = __webpack_require__(6);
 	
-	function laamStart(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[-33,0],[-15,-60],[-20,-129]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  // If called at 10ms intervals, each parameterized chunk requires 1s
-	  return [addVectors(vectorContributions), t + .003];
-	}
-	
-	function laamEnd(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[2,125],[2,137],[-60,133]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	
-	  return [addVectors(vectorContributions), t + .003];
-	}
-	
-	function tiltedAlif(t) {
-	  var vectorContributions = [];
-	  var ctrlPts = [[0,0],[24,49],[33,82],[41,121]];
-	  vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
-	  vectorContributions.push(scaleVector(3 * t * Math.pow(1 - t, 2), ctrlPts[1]));
-	  vectorContributions.push(scaleVector(3 * (1 - t) * Math.pow(t, 2), ctrlPts[2]));
-	  vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
-	
-	  // If called at 10ms intervals, each parameterized chunk requires 1s
-	  return [addVectors(vectorContributions), t + .003];
-	}
+	var laamStart = BezierPath([[0,0],[-33,0],[-15,-60],[-20,-129]], .003),
+	    laamEnd = BezierPath([[0,0],[2,125],[2,137],[-60,133]], .003),
+	    tiltedAlif = BezierPath([[0,0],[24,49],[33,82],[41,121]], .003);
 	
 	module.exports = [[laamStart], [laamEnd, [0, -125]], [tiltedAlif, [-80, 0]]];
 

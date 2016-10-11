@@ -1,19 +1,9 @@
-var scaleVector = function(k, v) {
-  return [k * v[0], k * v[1]];
-};
+var VectorUtils = require('./vector_utils'),
+    scaleVector = VectorUtils.scaleVector,
+    addVectors = VectorUtils.addVectors;
 
-var addVectors = function(rowVectors) {
-  var sumVector = new Array(rowVectors[0].length);
-  sumVector.forEach(function(el){return 0;});
-  rowVectors.forEach(function(vector) {
-    vector.forEach(function(el, idx) {
-      sumVector[idx] += el;
-    });
-  });
-  return sumVector;
-};
-
-var BezierPath = function(ctrlPts) {
+var BezierPath = function(ctrlPts, timeChange) {
+  timeChange = timeChange || .001;
   function parameterizedBezier(t) {
     var vectorContributions = [];
     vectorContributions.push(scaleVector(Math.pow(1 - t, 3), ctrlPts[0]));
@@ -22,7 +12,7 @@ var BezierPath = function(ctrlPts) {
     vectorContributions.push(scaleVector(Math.pow(t, 3), ctrlPts[3]));
 
     // If called at 10ms intervals, each parameterized chunk requires 1s
-    return [addVectors(vectorContributions), t + .001];
+    return [addVectors(vectorContributions), t + timeChange];
   }
 
   return parameterizedBezier;
