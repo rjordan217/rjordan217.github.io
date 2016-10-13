@@ -1,0 +1,82 @@
+body {
+  background-color: rgb(233, 251, 255);
+  font-size: 20px;
+  font-family: 'Philosopher', sans-serif;
+  box-sizing: border-box;
+}
+
+.intro-text {
+  width: 28%;
+  line-height: 1.3em;
+}
+
+h1 {
+  font-size: 3em;
+  text-align: center;
+}
+
+p {
+  text-indent: 2em;
+}
+
+.main {
+  width: 90vw;
+  margin: auto;
+  background-color: rgb(237, 253, 255);
+  border: 1px solid #eee;
+  padding: 1%;
+}
+
+.content {
+  background-color: navy;
+  color: lightblue;
+  border-radius: 1em;
+  border: .25em outset #1969c0;
+  padding: 1em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.content::after {
+  content: "";
+  clear: both;
+  display: block;
+}
+
+.canvas-container {
+  position: relative;
+  width: 68%;
+}
+
+canvas {
+    border: 1px solid black;
+    position: absolute;
+    right: 10px;
+    bottom: 15px;
+    width: 20%;
+    z-index: 1;
+}
+
+canvas:hover {
+    border: 0;
+    box-shadow: 0 0 3px 3px aqua;
+}
+
+.in-focus {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    background-color: white;
+    width: 100%;
+    z-index: 0;
+}
+
+#button-container {
+  position: absolute;
+  display: flex;
+  justify-content: space-around;
+  width: 10em;
+  right: 10px;
+  top: 15px;
+}
