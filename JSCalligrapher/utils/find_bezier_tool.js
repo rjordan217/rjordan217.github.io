@@ -1,3 +1,5 @@
+var diffVector = require('./vector_utils').diffVector;
+
 var FindBezierTool = function(ctx) {
   this.ctx = ctx;
   this.controlPoints = [[16,16],[46,16],[76, 16],[106,16]];
@@ -61,10 +63,6 @@ FindBezierTool.prototype.moveWithMouse = function (e) {
 FindBezierTool.prototype.draw = function () {
   this.drawControlPoints();
   this.drawBezier();
-};
-
-var diffVector = function(v1,v2) {
-  return [v2[0] - v1[0], v2[1] - v1[1]];
 };
 
 FindBezierTool.prototype.printRelativeControlPoints = function () {

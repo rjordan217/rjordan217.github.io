@@ -3,10 +3,31 @@
   <head>
     <meta charset="utf-8">
     <title>JSCalligrapher</title>
+    <link rel="stylesheet" href="../stylesheets/calligrapher_style.css" media="screen">
+    <link href="https://fonts.googleapis.com/css?family=Philosopher:400,700,400italic" rel="stylesheet" type="text/css">
   </head>
   <body>
-    <canvas id="drawing-canvas" width="900" height="800"></canvas>
-    <canvas id="edit-canvas" width="900" height="800"></canvas>
+    <div class="main">
+      <h1>JavaScript Calligrapher</h1>
+      <hr>
+      <section class="content">
+        <div class="intro-text">
+          <p class="description">
+            The JavaScript Calligrapher is a tool enabling the design of
+            stylized characters to be saved and drawn out on a canvas in real time.
+            This tool was designed with the main goal of teaching stroke order
+            to learners of a new language/writing system, but of course the utility
+            extends beyond the scope of stroke order to allow a great variety
+            of artistic expression.
+          </p>
+        </div>
+        <div class="canvas-container">
+          <canvas id="drawing-canvas" class="in-focus" width="900" height="500"></canvas>
+          <canvas id="edit-canvas" width="900" height="500"></canvas>
+          <div id="button-container"></div>
+        </div>
+      </section>
+    </div>
     <script src="./calligrapher_bundle.js" charset="utf-8"></script>
   </body>
 </html>

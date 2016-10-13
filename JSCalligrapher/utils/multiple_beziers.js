@@ -34,4 +34,17 @@ MultipleBeziers.prototype.bindMouse = function (el) {
   }.bind(this));
 };
 
+MultipleBeziers.prototype.outputFullInstructions = function () {
+  var instructions = [];
+
+  for(var i = 0; i < this.beziers.length; i++) {
+    var currentInstruction = {};
+    currentInstruction['ctrlPts'] = this.beziers[i].printRelativeControlPoints();
+    // currentInstruction['offsetAfter'] = this.beziers[i].offsetAfter;
+    // currentInstruction['offsetBefore'] = this.beziers[i].offsetBefore;
+    instructions.push(currentInstruction);
+  }
+  return instructions;
+};
+
 module.exports = MultipleBeziers;
