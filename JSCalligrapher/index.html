@@ -12,19 +12,56 @@
       <hr>
       <section class="content">
         <div class="intro-text">
-          <p class="description">
-            The JavaScript Calligrapher is a tool enabling the design of
-            stylized characters to be saved and drawn out on a canvas in real time.
-            This tool was designed with the main goal of teaching stroke order
-            to learners of a new language/writing system, but of course the utility
-            extends beyond the scope of stroke order to allow a great variety
-            of artistic expression.
-          </p>
+          <header class="info-headers">
+            <div class="info-header">
+              <h3>About</h3>
+              <div class="triangle"></div>
+            </div>
+            <div class="info-header">
+              <h3>How To</h3>
+              <div class="triangle"></div>
+            </div>
+            <div class="info-header">
+              <h3>Alphabets</h3>
+              <div class="triangle"></div>
+            </div>
+          </header>
+          <section class="info-sections">
+            <div class="info-section" id="info-about">
+              <p>The JavaScript Calligrapher is a tool enabling the design of
+                stylized characters to be saved and drawn out on a canvas in real time.
+                This tool was designed with the main goal of teaching stroke order
+                to learners of a new language/writing system, but of course the utility
+                extends beyond the scope of stroke order to allow a great variety
+                of artistic expression.</p>
+            </div>
+            <div class="info-section" id="info-instructions">
+              <p>The calligrapher tool consists of two canvas elements (one for
+                drawing, the other for editing) that may be interchanged by clicking
+                on one or the other.</p>
+              <p>Design your masterpiece with Bézier curves on the editing canvas. Each
+                curve object has four control points—learn about the math
+                <a href="#">here</a>—, and an optional yellow point may be added as
+                the offset to baseline (for designing letters that can be saved and
+                later chained into words).</p>
+            </div>
+            <div class="info-section" id="info-alphabets">
+              <p>Under Development</p>
+              <p>This tab will contain characters/alphabets from the website and
+              designed by you, the user.</p>
+            </div>
+          </section>
         </div>
         <div class="canvas-container">
           <canvas id="drawing-canvas" class="in-focus" width="900" height="500"></canvas>
           <canvas id="edit-canvas" width="900" height="500"></canvas>
-          <div id="button-container"></div>
+          <div id="button-container">
+            <div id="button-movebar"><button id="minimize">—</span></div>
+            <img id="add-button" src="../res/nouvelle_icon.png" alt="Add Curve" title="Add Curve" />
+            <!-- <img id="select-curve-button" src="../res/curve_icon.png" alt="Select Curve" title="Select Curve" /> -->
+            <img id="draw-button" src="../res/fountain_pen.png" alt="Draw Curves" title="Draw Curves" />
+            <img id="reset-button" src="../res/trashbin.png" alt="Reset" title="Reset" />
+          </div>
         </div>
       </section>
     </div>

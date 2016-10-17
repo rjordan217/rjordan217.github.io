@@ -4,11 +4,33 @@ var FindBezierTool = function(ctx) {
   this.ctx = ctx;
   this.controlPoints = [[16,16],[46,16],[76, 16],[106,16]];
   this.clickedPoint = null;
+  this.offsetBeforePoint = null;
+  this.offsetAfterPoint = null;
+  this.color = 'black';
+};
+
+FindBezierTool.prototype.select = function () {
+  this.color = '#1969c0'
+};
+
+FindBezierTool.prototype.deselect = function () {
+  this.color = 'black';
+};
+
+FindBezierTool.prototype.first = function () {
+  return this.controlPoints[0];
+};
+
+FindBezierTool.prototype.last = function () {
+  return this.controlPoints[3];
 };
 
 FindBezierTool.prototype.drawControlPoints = function () {
   var ctx = this.ctx;
+  ctx.fillStyle = this.color;
+  ctx.strokeStyle = 'black';
   for (var i = 0; i < 4; i++) {
+    ctx.fillStyle = (this.clickedPoint == i ? '#8a2b2b' : this.color);
     ctx.beginPath();
     ctx.arc(
       this.controlPoints[i][0],
@@ -19,12 +41,13 @@ FindBezierTool.prototype.drawControlPoints = function () {
       false
     );
     ctx.fill();
+    ctx.stroke();
   }
 };
 
 FindBezierTool.prototype.drawBezier = function () {
   var ctx = this.ctx;
-
+  ctx.strokeStyle = this.color;
   ctx.beginPath();
   var ctrlPts = this.controlPoints;
   ctx.moveTo(ctrlPts[0][0], ctrlPts[0][1]);
@@ -66,20 +89,10 @@ FindBezierTool.prototype.draw = function () {
 };
 
 FindBezierTool.prototype.printRelativeControlPoints = function () {
-  this.ctx.font = "20px Palatino";
-  var relPointsToLog = [];
   var startPoint = this.controlPoints[0];
-  this.controlPoints.forEach(function(ctrlPt, idx) {
-    var relPoint = diffVector(startPoint, ctrlPt);
-    relPointsToLog.push(relPoint);
-    this.ctx.fillText(
-      "Control Point " + idx + ": " + relPoint.toString() + "\n",
-      800,
-      600 + 25 * idx
-    );
+  return this.controlPoints.map(function(ctrlPt, idx) {
+    return diffVector(startPoint, ctrlPt);
   }.bind(this));
-  console.log("Control Points: " + relPointsToLog);
-  return relPointsToLog;
 };
 
 module.exports = FindBezierTool;

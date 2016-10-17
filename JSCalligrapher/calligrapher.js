@@ -4,7 +4,13 @@ var drawCanvasEl = document.getElementById('drawing-canvas'),
     editCtx = editCanvasEl.getContext('2d'),
     parent = drawCanvasEl.parentNode,
     buttonDiv = document.getElementById('button-container'),
-    currentCanvas = drawCanvasEl;
+    currentCanvas = drawCanvasEl,
+    infoHeaders = document.getElementsByClassName('info-header'),
+    infoContent = document.getElementsByClassName('info-section'),
+    minimize = document.getElementById('minimize');
+
+infoHeaders = Array.prototype.slice.call(infoHeaders, 0, infoHeaders.length);
+infoContent = Array.prototype.slice.call(infoContent, 0, infoContent.length);
 
 function generateButton(text, clickCB, parentEl) {
   var newButt = document.createElement('button');
@@ -79,12 +85,86 @@ brush.cgStart(phrase);
 function calligraph() {
   var instructions = bezierTool.outputFullInstructions();
   var newPhrase = instructions.map(function(instrSet) {
-    return [BezierPath(instrSet.ctrlPts, .003)];
+    return [BezierPath(instrSet.ctrlPts, .003), instrSet.offsetAfter];
   });
-  ctx.clearRect(0,0,1200,800);
+  ctx.clearRect(0,0,900,500);
   brush = new Brush(ctx, bezierTool.beziers[0].controlPoints[0], 3 * drawCanvasEl.height / 4);
   brush.cgStart(newPhrase);
 };
 
-generateButton("Add Bezier",bezierTool.addBezier.bind(bezierTool),buttonDiv);
-generateButton("Write it!",calligraph,buttonDiv);
+document.getElementById('add-button').onclick = function() {
+  bezierTool.addBezier();
+  bezierTool.draw();
+}
+document.getElementById('draw-button').onclick = calligraph;
+document.getElementById('reset-button').onclick = function() {
+  bezierTool.resetBeziers();
+  ctx.clearRect(0,0,900,500);
+};
+
+function displaySection(idx) {
+  infoContent.forEach((el, i) => {
+    if(idx == i) {
+      el.style.display = "block";
+    } else {
+      el.style.display = "none";
+    }
+  });
+}
+
+infoHeaders.forEach((el, idx) => {
+  el.onclick = (e) => {
+    e.preventDefault();
+    displaySection(idx);
+  };
+});
+displaySection(0);
+
+var movebar = document.getElementById('button-movebar'),
+    movebarClicked = false,
+    delX = 0,
+    delY = 0;
+
+function moveButtonsWithMouse(e) {
+  var buttonsRect = movebar.getBoundingClientRect(),
+      canvasRect = parent.getBoundingClientRect();
+
+  buttonDiv.style.right = (canvasRect.right - (e.clientX + delX)) + "px";
+  buttonDiv.style.top = ((e.clientY - delY) - canvasRect.top) + "px";// ▼
+}
+
+movebar.onmousedown = function(e) {
+  e.preventDefault();
+
+  var buttonsRect = movebar.getBoundingClientRect();
+
+  movebarClicked = true;
+  delX = buttonsRect.right - e.clientX;
+  delY = e.clientY - buttonsRect.top;
+}
+parent.onmousemove = function(e) {
+  if(movebarClicked) {
+    moveButtonsWithMouse(e);
+  }
+}
+document.onmouseup = function(e) {
+  e.preventDefault();
+  movebarClicked = false;
+}
+
+var minimized = false;
+minimize.onclick = function(e) {
+  e.preventDefault();
+  if(e.stopPropagation) e.stopPropagation();
+  if(e.cancelBubble !== undefined) e.cancelBubble = true;
+
+  if(minimized) {
+    buttonDiv.classList.remove('minimized');
+    minimized = false;
+    minimize.innerHTML = "—";
+  } else {
+    buttonDiv.classList.add('minimized')
+    minimized = true;
+    minimize.innerHTML = "▼";
+  }
+}

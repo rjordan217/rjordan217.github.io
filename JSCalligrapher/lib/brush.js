@@ -58,10 +58,11 @@ Brush.prototype.cgStart = function(funcsToDraw) {
       self.currentPos = addVectors([self.currentPos, offsetBefore]);
       var originalPos = self.currentPos;
       var isSpace = (currentFunc.name === "space");
-      
+
       self.strokeInterval = setInterval(function() {
         if(self.cgStrokePath(currentFunc, originalPos, isSpace) && self.strokeInterval) {
           clearInterval(self.strokeInterval);
+          offsetAfter = offsetAfter || [0,0];
           self.currentPos = addVectors([self.currentPos, offsetAfter]);
           drawAndCallNext();
         }

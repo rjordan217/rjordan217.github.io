@@ -50,7 +50,13 @@
 	    editCtx = editCanvasEl.getContext('2d'),
 	    parent = drawCanvasEl.parentNode,
 	    buttonDiv = document.getElementById('button-container'),
-	    currentCanvas = drawCanvasEl;
+	    currentCanvas = drawCanvasEl,
+	    infoHeaders = document.getElementsByClassName('info-header'),
+	    infoContent = document.getElementsByClassName('info-section'),
+	    minimize = document.getElementById('minimize');
+	
+	infoHeaders = Array.prototype.slice.call(infoHeaders, 0, infoHeaders.length);
+	infoContent = Array.prototype.slice.call(infoContent, 0, infoContent.length);
 	
 	function generateButton(text, clickCB, parentEl) {
 	  var newButt = document.createElement('button');
@@ -125,15 +131,89 @@
 	function calligraph() {
 	  var instructions = bezierTool.outputFullInstructions();
 	  var newPhrase = instructions.map(function(instrSet) {
-	    return [BezierPath(instrSet.ctrlPts, .003)];
+	    return [BezierPath(instrSet.ctrlPts, .003), instrSet.offsetAfter];
 	  });
-	  ctx.clearRect(0,0,1200,800);
+	  ctx.clearRect(0,0,900,500);
 	  brush = new Brush(ctx, bezierTool.beziers[0].controlPoints[0], 3 * drawCanvasEl.height / 4);
 	  brush.cgStart(newPhrase);
 	};
 	
-	generateButton("Add Bezier",bezierTool.addBezier.bind(bezierTool),buttonDiv);
-	generateButton("Write it!",calligraph,buttonDiv);
+	document.getElementById('add-button').onclick = function() {
+	  bezierTool.addBezier();
+	  bezierTool.draw();
+	}
+	document.getElementById('draw-button').onclick = calligraph;
+	document.getElementById('reset-button').onclick = function() {
+	  bezierTool.resetBeziers();
+	  ctx.clearRect(0,0,900,500);
+	};
+	
+	function displaySection(idx) {
+	  infoContent.forEach((el, i) => {
+	    if(idx == i) {
+	      el.style.display = "block";
+	    } else {
+	      el.style.display = "none";
+	    }
+	  });
+	}
+	
+	infoHeaders.forEach((el, idx) => {
+	  el.onclick = (e) => {
+	    e.preventDefault();
+	    displaySection(idx);
+	  };
+	});
+	displaySection(0);
+	
+	var movebar = document.getElementById('button-movebar'),
+	    movebarClicked = false,
+	    delX = 0,
+	    delY = 0;
+	
+	function moveButtonsWithMouse(e) {
+	  var buttonsRect = movebar.getBoundingClientRect(),
+	      canvasRect = parent.getBoundingClientRect();
+	
+	  buttonDiv.style.right = (canvasRect.right - (e.clientX + delX)) + "px";
+	  buttonDiv.style.top = ((e.clientY - delY) - canvasRect.top) + "px";// ▼
+	}
+	
+	movebar.onmousedown = function(e) {
+	  e.preventDefault();
+	
+	  var buttonsRect = movebar.getBoundingClientRect();
+	
+	  movebarClicked = true;
+	  delX = buttonsRect.right - e.clientX;
+	  delY = e.clientY - buttonsRect.top;
+	}
+	parent.onmousemove = function(e) {
+	  if(movebarClicked) {
+	    moveButtonsWithMouse(e);
+	  }
+	}
+	document.onmouseup = function(e) {
+	  e.preventDefault();
+	  movebarClicked = false;
+	}
+	
+	var minimized = false;
+	minimize.onclick = function(e) {
+	  e.preventDefault();
+	  if(e.stopPropagation) e.stopPropagation();
+	  if(e.cancelBubble !== undefined) e.cancelBubble = true;
+	
+	  if(minimized) {
+	    buttonDiv.classList.remove('minimized');
+	    minimized = false;
+	    minimize.innerHTML = "—";
+	  } else {
+	    buttonDiv.classList.add('minimized')
+	    minimized = true;
+	    minimize.innerHTML = "▼";
+	  }
+	}
 
 
 /***/ },
@@ -200,10 +280,11 @@
 	      self.currentPos = addVectors([self.currentPos, offsetBefore]);
 	      var originalPos = self.currentPos;
 	      var isSpace = (currentFunc.name === "space");
-	      
+	
 	      self.strokeInterval = setInterval(function() {
 	        if(self.cgStrokePath(currentFunc, originalPos, isSpace) && self.strokeInterval) {
 	          clearInterval(self.strokeInterval);
+	          offsetAfter = offsetAfter || [0,0];
 	          self.currentPos = addVectors([self.currentPos, offsetAfter]);
 	          drawAndCallNext();
 	        }
@@ -225,6 +306,15 @@
 /***/ function(module, exports) {
 
 	var VectorUtils = {
+	  distance: function(pos1,pos2) {
+	    var x1 = pos1[0],
+	        y1 = pos1[1],
+	        x2 = pos2[0],
+	        y2 = pos2[1];
+	
+	    return Math.sqrt(Math.pow((x2 - x1),2) + Math.pow((y2 - y1),2));
+	  },
+	  
 	  scaleVector: function(k, v) {
 	    return [k * v[0], k * v[1]];
 	  },
@@ -252,15 +342,14 @@
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var FindBezierTool = __webpack_require__(4);
+	var FindBezierTool = __webpack_require__(4),
+	    diffVector = __webpack_require__(2).diffVector,
+	    distance = __webpack_require__(2).distance;
 	
 	var MultipleBeziers = function(ctx) {
 	  this.ctx = ctx;
 	  this.beziers = [];
-	};
-	
-	MultipleBeziers.prototype.addBezier = function () {
-	  this.beziers.push(new FindBezierTool(this.ctx));
+	  this.currentIdx = 0;
 	};
 	
 	MultipleBeziers.prototype.draw = function () {
@@ -268,22 +357,45 @@
 	  this.beziers.forEach(function(bezier){bezier.draw()});
 	};
 	
+	MultipleBeziers.prototype.switchCurrent = function (newIdx) {
+	  this.beziers[this.currentIdx].deselect();
+	  this.currentIdx = newIdx;
+	  this.beziers[newIdx].select();
+	};
+	
+	MultipleBeziers.prototype.addBezier = function () {
+	  this.beziers.push(new FindBezierTool(this.ctx));
+	  this.switchCurrent(this.beziers.length - 1);
+	  this.draw();
+	};
+	
 	MultipleBeziers.prototype.bindMouse = function (el) {
 	  el.addEventListener("mousedown", function(e) {
-	    this.beziers.forEach(function(bezier) {
-	      bezier.clickedPoint = bezier.detectClickRegion(e);
-	    });
+	    var beziers = this.beziers,
+	        currIdx = this.currentIdx;
+	    if(beziers.length) {
+	      beziers[currIdx].clickedPoint = beziers[currIdx].detectClickRegion(e)
+	      if(beziers[currIdx].clickedPoint == null) {
+	        for(var idx = beziers.length - 1; idx >= 0; idx -= 1) {
+	          if(idx !== currIdx) {
+	            beziers[idx].clickedPoint = beziers[idx].detectClickRegion(e);
+	            if(beziers[idx].clickedPoint !== null) {
+	              this.switchCurrent(idx);
+	              break;
+	            }
+	          }
+	        }
+	      }
+	    }
+	    this.draw();
 	  }.bind(this));
 	  el.addEventListener("mousemove", function(e) {
-	    this.beziers.forEach(function(bezier) {
-	      bezier.moveWithMouse(e);
-	    });
+	    if(this.beziers[this.currentIdx]) this.beziers[this.currentIdx].moveWithMouse(e);
 	    this.draw();
 	  }.bind(this));
 	  el.addEventListener("mouseup", function(e) {
 	    this.beziers.forEach(function(bezier) {
 	      bezier.clickedPoint = null;
-	      bezier.printRelativeControlPoints();
 	    });
 	  }.bind(this));
 	};
@@ -294,11 +406,26 @@
 	  for(var i = 0; i < this.beziers.length; i++) {
 	    var currentInstruction = {};
 	    currentInstruction['ctrlPts'] = this.beziers[i].printRelativeControlPoints();
-	    // currentInstruction['offsetAfter'] = this.beziers[i].offsetAfter;
-	    // currentInstruction['offsetBefore'] = this.beziers[i].offsetBefore;
+	    if(i < this.beziers.length - 1 &&
+	      distance(this.beziers[i].last(), this.beziers[i + 1].first()) > 5) {
+	      currentInstruction['offsetAfter'] = diffVector(
+	        this.beziers[i].last(),
+	        this.beziers[i + 1].first()
+	      );
+	    }
 	    instructions.push(currentInstruction);
 	  }
 	  return instructions;
+	};
+	
+	MultipleBeziers.prototype.resetBeziers = function () {
+	  this.beziers.forEach(function(bezier) {
+	    bezier.ctx = null;
+	    bezier.controlPoints = null;
+	  });
+	  this.beziers = [];
+	  this.currentIdx = 0;
+	  this.draw();
 	};
 	
 	module.exports = MultipleBeziers;
@@ -314,11 +441,33 @@
 	  this.ctx = ctx;
 	  this.controlPoints = [[16,16],[46,16],[76, 16],[106,16]];
 	  this.clickedPoint = null;
+	  this.offsetBeforePoint = null;
+	  this.offsetAfterPoint = null;
+	  this.color = 'black';
+	};
+	
+	FindBezierTool.prototype.select = function () {
+	  this.color = '#1969c0'
+	};
+	
+	FindBezierTool.prototype.deselect = function () {
+	  this.color = 'black';
+	};
+	
+	FindBezierTool.prototype.first = function () {
+	  return this.controlPoints[0];
+	};
+	
+	FindBezierTool.prototype.last = function () {
+	  return this.controlPoints[3];
 	};
 	
 	FindBezierTool.prototype.drawControlPoints = function () {
 	  var ctx = this.ctx;
+	  ctx.fillStyle = this.color;
+	  ctx.strokeStyle = 'black';
 	  for (var i = 0; i < 4; i++) {
+	    ctx.fillStyle = (this.clickedPoint == i ? '#8a2b2b' : this.color);
 	    ctx.beginPath();
 	    ctx.arc(
 	      this.controlPoints[i][0],
@@ -329,12 +478,13 @@
 	      false
 	    );
 	    ctx.fill();
+	    ctx.stroke();
 	  }
 	};
 	
 	FindBezierTool.prototype.drawBezier = function () {
 	  var ctx = this.ctx;
-	
+	  ctx.strokeStyle = this.color;
 	  ctx.beginPath();
 	  var ctrlPts = this.controlPoints;
 	  ctx.moveTo(ctrlPts[0][0], ctrlPts[0][1]);
@@ -376,20 +526,10 @@
 	};
 	
 	FindBezierTool.prototype.printRelativeControlPoints = function () {
-	  this.ctx.font = "20px Palatino";
-	  var relPointsToLog = [];
 	  var startPoint = this.controlPoints[0];
-	  this.controlPoints.forEach(function(ctrlPt, idx) {
-	    var relPoint = diffVector(startPoint, ctrlPt);
-	    relPointsToLog.push(relPoint);
-	    this.ctx.fillText(
-	      "Control Point " + idx + ": " + relPoint.toString() + "\n",
-	      800,
-	      600 + 25 * idx
-	    );
+	  return this.controlPoints.map(function(ctrlPt, idx) {
+	    return diffVector(startPoint, ctrlPt);
 	  }.bind(this));
-	  console.log("Control Points: " + relPointsToLog);
-	  return relPointsToLog;
 	};
 	
 	module.exports = FindBezierTool;

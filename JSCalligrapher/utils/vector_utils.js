@@ -1,4 +1,13 @@
 var VectorUtils = {
+  distance: function(pos1,pos2) {
+    var x1 = pos1[0],
+        y1 = pos1[1],
+        x2 = pos2[0],
+        y2 = pos2[1];
+
+    return Math.sqrt(Math.pow((x2 - x1),2) + Math.pow((y2 - y1),2));
+  },
+  
   scaleVector: function(k, v) {
     return [k * v[0], k * v[1]];
   },
