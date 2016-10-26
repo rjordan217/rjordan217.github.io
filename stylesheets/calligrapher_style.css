@@ -1,3 +1,58 @@
+html, body, header, nav, h1, a,
+ul, li, strong, main, button, i,
+section, img, div, h2, p, form,
+fieldset, label, input, textarea,
+span, article, footer, time, small {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  text-decoration: inherit;
+  vertical-align: inherit;
+  box-sizing: inherit;
+  background: transparent;
+}
+
+ul {
+  list-style: none;
+}
+
+img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+input[type="password"],
+input[type="email"],
+input[type="text"],
+input[type="submit"],
+textarea,
+button {
+  /*
+  Get rid of native styling. Read more here:
+  http://css-tricks.com/almanac/properties/a/appearance/
+  */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+button,
+input[type="submit"] {
+  cursor: pointer;
+}
+
+/* Clearfix */
+
+.group:after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
 body {
   background-color: rgb(233, 251, 255);
   font-size: 20px;
@@ -5,18 +60,21 @@ body {
   box-sizing: border-box;
 }
 
-.intro-text {
-  width: 28%;
-  line-height: 1.3em;
-}
-
 h1 {
   font-size: 3em;
   text-align: center;
 }
 
+h3 {
+  font-size: 1.1em;
+}
+
 p {
   text-indent: 2em;
+}
+
+a {
+  color: #47B0FF;
 }
 
 .main {
@@ -32,7 +90,7 @@ p {
   color: lightblue;
   border-radius: 1em;
   border: .25em outset #1969c0;
-  padding: 1em;
+  padding: .5em;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -44,9 +102,63 @@ p {
   display: block;
 }
 
+.intro-text {
+  width: 312px;
+  line-height: 1.3em;
+  padding: .5em;
+  background-color: lightblue;
+  border-radius: .5em;
+
+}
+
 .canvas-container {
   position: relative;
-  width: 68%;
+  width: 63%;
+  width: calc(100% - 350px);
+}
+
+.info-headers {
+  display: flex;
+  justify-content: center;
+}
+
+.info-header {
+  margin-left: 1px;
+  border-top-right-radius: .5em;
+  border-top-left-radius: .5em;
+  background-color: navy;
+  padding: .5em .5em 0 .5em;
+}
+
+.info-header h3 {
+  margin: .1em auto;
+}
+
+.info-header:hover h3 {
+  color: blue;
+}
+
+.info-header:hover .triangle {
+  border-bottom-color: blue;
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 15px solid lightblue;
+  margin: auto;
+}
+
+.info-sections {
+  background-color: navy;
+  padding: .5em 0;
+  border-radius: 0 0 .5em .5em;
+}
+
+.info-section {
+  padding: 0 1em;
 }
 
 canvas {
@@ -56,6 +168,7 @@ canvas {
     bottom: 15px;
     width: 20%;
     z-index: 1;
+    cursor: crosshair;
 }
 
 canvas:hover {
@@ -76,7 +189,50 @@ canvas:hover {
   position: absolute;
   display: flex;
   justify-content: space-around;
-  width: 10em;
+  flex-flow: row wrap;
+  background-color: navy;
   right: 10px;
   top: 15px;
+  border-radius: .25em;
+  border: 1px solid black;
+  z-index: 2;
+}
+
+#button-movebar {
+  width: 100%;
+  height: 1em;
+  border-top-left-radius: .25em;
+  border-top-right-radius: .25em;
+  background-color: cornflowerblue;
+  cursor: move;
+  text-align: right;
+}
+
+#button-container button {
+  font-size: .8em;
+}
+
+#button-container img {
+  width: 2em;
+  height: 2em;
+  background-color: silver;
+  border: 1px solid black;
+  border-radius: .2em;
+  cursor: pointer;
+}
+
+#button-container img:hover {
+  background-color: white;
+}
+
+#button-container > button {
+  padding: .5em;
+  border-radius: .2em;
+  border: 1px solid black;
+  background-color: silver;
+  color: black;
+}
+
+.minimized > img {
+  display: none;
 }

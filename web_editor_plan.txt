@@ -1,0 +1,13 @@
+Web Editor Desired Features:
+Select text, can generate new tag to wrap around
+Shortcut to apply CSS properties to specific elements:
+- Will pop down list of possible selectors, starting with id, then class, then more general
+  + Text can be directly edited
+  + Have CSS ordered by first appearance of selector in DOM tree
+- Example: Command + P brings up menu to edit position property
+  + Absolute positioning would trace up rendering tree to determine anchor ancestor
+  + Top, left, etc. would then be calculated relative to this element
+- Sizing should be easily converted among em, percent, etc.
+Multiple windows for views of pure HTML, HTML with box-model, or only display view
+- Displays box model with tags
+  + Will need way to resolve overlap/move back one layer
