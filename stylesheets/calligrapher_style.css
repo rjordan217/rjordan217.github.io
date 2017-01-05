@@ -77,8 +77,18 @@ a {
   color: #47B0FF;
 }
 
+.bg-img {
+  opacity: .7;
+  background-image: url('../res/blue_damask.jpg');
+  width: 100%;
+  height: 100vh;
+  z-index: -10;
+  position: fixed;
+}
+
 .main {
   width: 90vw;
+  min-height: 100vh;
   margin: auto;
   background-color: rgb(237, 253, 255);
   border: 1px solid #eee;
