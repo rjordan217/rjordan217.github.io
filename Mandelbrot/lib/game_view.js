@@ -1,14 +1,21 @@
 var MandelbrotImage = require('./mandelbrot_image');
 
 var GameView = function(canvasEl) {
-  console.log("Initializing");
   this.$canvasEl = $(canvasEl);
-  this.image = new MandelbrotImage(canvasEl.getContext('2d'));
-  console.log(this.image);
+  this.image = new MandelbrotImage(
+    canvasEl.getContext('2d'),
+    canvasEl.width,
+    canvasEl.height
+  );
 };
 
 GameView.prototype.launch = function() {
-  console.log("Launching");
+  // this.$canvasEl.ondoubleclick = function(e) {
+  //   var width = this.$canvasEl.width
+  //   var height = this.$canvasEl.height
+  //   this.image.zoomOnPosition(e.offsetX / width,e.offsetY / height)
+  //   this.image.draw()
+  // }.bind(this) // TODO: Fix this
   this.image.draw();
   $('.loading').css("display", "none");
   this.$canvasEl.css("display","block");

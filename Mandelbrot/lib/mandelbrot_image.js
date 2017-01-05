@@ -4,39 +4,83 @@ var squareAndAddComplexNum = require('./complex_utils').squareAndAddComplexNum,
     inCardioid = require('./complex_utils').inCardioid,
     inMainDisk = require('./complex_utils').inMainDisk;
 
-var MandelbrotImage = function(ctx) {
+var MandelbrotImage = function(ctx,pxWidth,pxHeight) {
   this.ctx = ctx;
+  this.upperLeft = [-2,1]
+  this.bottomRight = [1,-1]
+  this.pxWidth = pxWidth
+  this.pxHeight = pxHeight
+  this.zoomLevel = 0
+  // With zoom, can save previous zoom images to prevent reload time
+};
+
+MandelbrotImage.prototype.zoomOnPosition = function (x,y) {
+  this.zoomLevel++
+
+  var rangeX = this.bottomRight[0] - this.upperLeft[0],
+      rangeY = this.bottomRight[1] - this.upperLeft[1]
+
+  var scaledUL = [],
+      scaledBR = []
+
+
+};
+
+MandelbrotImage.prototype.setChunkData = function (tl,delX,delY,chunk) {
+  var d  = chunk.data
+
+  var currentPos = tl.slice(0,2),
+      i = 0;
+
+  while(i < d.length) {
+    d[i++] = 0
+    d[i++] = 0
+    if(inCardioid(currentPos) || inMainDisk(currentPos)) {
+      d[i++] = 0
+    } else {
+      d[i++] = iterate(currentPos,256)
+    }
+    d[i++] = 255
+    if(Math.round(i / 4) % chunk.width == 0) {
+      currentPos[1] += delY
+      currentPos[0] = tl[0]
+    } else {
+      currentPos[0] += delX
+    }
+  }
 };
 
 MandelbrotImage.prototype.draw = function () {
-  var ctx = this.ctx;
-  var id = ctx.createImageData(1,1); // only do this once per page
-  var d  = id.data;                       // only do this once per page
-  d[0] = 0;
-  d[1] = 0;
-  d[2] = 0;
-  d[3] = 255;
-  console.log("Drawing");
-  var xIter = -2,
-      rangeX = 3,
-      delX = rangeX / DIM_X,
-      yIter = 1,
-      rangeY = -2,
-      delY = rangeY / DIM_Y;
+  var numXChunks = 4,
+      numYChunks = 3,
+      tl = this.upperLeft,
+      br = this.bottomRight,
+      rangeX = br[0] - tl[0],
+      rangeY = br[1] - tl[1],
+      delX = rangeX / numXChunks,
+      delY = rangeY / numYChunks,
+      chunkDelX = rangeX / this.pxWidth,
+      chunkDelY = rangeY / this.pxHeight,
+      chunkTL
 
-  for(var x = 0; x < DIM_X; x++) {
-    xIter += delX;
-    for(var y = 0; y < DIM_Y; y++) {
-      yIter += delY;
-      if (inCardioid([xIter,yIter]) || inMainDisk([xIter, yIter])) {
-        d[2] = 0;
-      } else {
-        d[2] = iterate([xIter, yIter], 256);
-      }
-      ctx.putImageData( id, x, y );
+  function _chunk(i,j,chunk) {
+    if(i == numXChunks) {
+      i = 0
+      j++
     }
-    yIter = 1;
+    if(j == numYChunks) return;
+
+    chunkTL = [tl[0] + i * delX, tl[1] + j * delY]
+    this.setChunkData(chunkTL,chunkDelX,chunkDelY,chunk)
+    this.ctx.putImageData(chunk,i * this.pxWidth / numXChunks,j * this.pxHeight / numYChunks)
+    setTimeout(_chunk.bind(this,i + 1, j, chunk),5) // Prevents thread-blocking for too long
   }
+
+  var chunk = this.ctx.createImageData(
+    this.pxWidth / numXChunks,
+    this.pxHeight / numYChunks
+  )
+  _chunk.call(this,0,0,chunk)
 };
 
 module.exports = MandelbrotImage;
