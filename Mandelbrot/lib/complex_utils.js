@@ -23,7 +23,7 @@ module.exports = {
     var iterator = [0,0];
     for(var i = 0; i < numSteps; i++) {
       iterator = squareAndAddComplexNum(iterator, pos);
-      if(magnitude(iterator) > 256) return (1 - i / numSteps) * 255;
+      if(magnitude(iterator) > 8) return (1 - i / numSteps) * 255;
     }
     return 0;
   },

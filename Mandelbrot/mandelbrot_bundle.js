@@ -44,39 +44,84 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var canvasEl = document.getElementById('mandelbrot-canvas'),
-	    ctx = canvasEl.getContext('2d'),
+	var mandelCanvEl = document.getElementById('mandelbrot-canvas'),
+	    colorGradEl = document.getElementById('color-canvas'),
 	    GameView = __webpack_require__(1),
-	    mandel = new GameView(canvasEl);
-	    
+	    mandel = new GameView(mandelCanvEl,colorGradEl);
+	
 	setTimeout(mandel.launch.bind(mandel), 50);
+	
+	var infoHeaders = document.getElementsByClassName('info-header'),
+	    infoContent = document.getElementsByClassName('info-section');
+	
+	infoHeaders = Array.prototype.slice.call(infoHeaders, 0, infoHeaders.length);
+	infoContent = Array.prototype.slice.call(infoContent, 0, infoContent.length);
+	
+	
+	function displaySection(idx) {
+	  infoContent.forEach((el, i) => {
+	    if(idx == i) {
+	      el.style.display = "block";
+	    } else {
+	      el.style.display = "none";
+	    }
+	  });
+	}
+	
+	infoHeaders.forEach((el, idx) => {
+	  el.onclick = (e) => {
+	    e.preventDefault();
+	    displaySection(idx);
+	  };
+	});
+	displaySection(0);
 
 
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var MandelbrotImage = __webpack_require__(2);
+	var MandelbrotImage = __webpack_require__(2),
+	    ColorGrad = __webpack_require__(4);
 	
-	var GameView = function(canvasEl) {
-	  this.$canvasEl = $(canvasEl);
+	var GameView = function(mandelCanvEl,colorCanvEl) {
+	  this.mandelCanvEl = mandelCanvEl;
 	  this.image = new MandelbrotImage(
-	    canvasEl.getContext('2d'),
-	    canvasEl.width,
-	    canvasEl.height
+	    mandelCanvEl.getContext('2d'),
+	    mandelCanvEl.width,
+	    mandelCanvEl.height
 	  );
+	  this.colorCanvEl = colorCanvEl;
+	  this.colorGrad = new ColorGrad(
+	    colorCanvEl.getContext('2d'),
+	    this.image.updateColor.bind(this.image)
+	  )
 	};
 	
 	GameView.prototype.launch = function() {
-	  // this.$canvasEl.ondoubleclick = function(e) {
-	  //   var width = this.$canvasEl.width
-	  //   var height = this.$canvasEl.height
-	  //   this.image.zoomOnPosition(e.offsetX / width,e.offsetY / height)
-	  //   this.image.draw()
-	  // }.bind(this) // TODO: Fix this
+	  this.mandelCanvEl.ondblclick = function(e) {
+	    this.image.zoomOnPosition(
+	      e.offsetX * this.mandelCanvEl.width / this.mandelCanvEl.clientWidth,
+	      e.offsetY * this.mandelCanvEl.height / this.mandelCanvEl.clientHeight
+	    )
+	    this.image.draw()
+	  }.bind(this)
+	
 	  this.image.draw();
-	  $('.loading').css("display", "none");
-	  this.$canvasEl.css("display","block");
+	  [].forEach.call(
+	    document.getElementsByClassName('loading'),
+	    function(el) {el.style.display = "none"}
+	  );
+	  this.mandelCanvEl.style.display = "block";
+	  var zoomOut = document.getElementById("zoom-out")
+	  zoomOut.innerHTML = "Zoom Out"
+	  zoomOut.onclick = this.image.zoomOut.bind(this.image)
+	  this.mandelCanvEl.parentElement.appendChild(zoomOut)
+	
+	  this.colorGrad.launch(
+	    this.colorCanvEl.width / this.colorCanvEl.clientWidth,
+	    this.colorCanvEl.height / this.colorCanvEl.clientHeight
+	  )
 	};
 	
 	module.exports = GameView;
@@ -92,6 +137,30 @@
 	    inCardioid = __webpack_require__(3).inCardioid,
 	    inMainDisk = __webpack_require__(3).inMainDisk;
 	
+	function unitColorVect(rgbArray) {
+	  var floatArray = [] // rgbArray is UIntClampedArray, so .map will not return floats
+	  rgbArray.forEach(function(el) {floatArray.push(el / 255)})
+	  return floatArray;
+	}
+	
+	function rotateColorData(ctx,originalData,newColorVect) {
+	  var newData = ctx.createImageData(originalData.width,originalData.height),
+	      newD = newData.data,
+	      d = originalData.data,
+	      i = 0,
+	      colorMag;
+	
+	  while(i < d.length) {
+	    colorMag = Math.max(d[i],d[i + 1],d[i + 2]);
+	    newD[i++] = newColorVect[0] * colorMag;
+	    newD[i++] = newColorVect[1] * colorMag;
+	    newD[i++] = newColorVect[2] * colorMag;
+	    newD[i++] = 255;
+	  }
+	
+	  return newData
+	}
+	
 	var MandelbrotImage = function(ctx,pxWidth,pxHeight) {
 	  this.ctx = ctx;
 	  this.upperLeft = [-2,1]
@@ -99,35 +168,68 @@
 	  this.pxWidth = pxWidth
 	  this.pxHeight = pxHeight
 	  this.zoomLevel = 0
-	  // With zoom, can save previous zoom images to prevent reload time
+	  this.previousZooms = []
+	  this.color = [0,0,1]
+	};
+	
+	MandelbrotImage.prototype.range = function (axis) {
+	  return this.bottomRight[axis] - this.upperLeft[axis]
 	};
 	
 	MandelbrotImage.prototype.zoomOnPosition = function (x,y) {
+	  var ctx = this.ctx;
+	
 	  this.zoomLevel++
+	  this.previousZooms.push({
+	    ul: this.upperLeft.slice(0,2),
+	    br: this.bottomRight.slice(0,2),
+	    data: ctx.getImageData(0,0,this.pxWidth,this.pxHeight)
+	  })
 	
-	  var rangeX = this.bottomRight[0] - this.upperLeft[0],
-	      rangeY = this.bottomRight[1] - this.upperLeft[1]
+	  var rangeX = this.range(0),
+	      rangeY = this.range(1),
+	      cartX = this.upperLeft[0] + x * rangeX / this.pxWidth,
+	      cartY = this.upperLeft[1] + y * rangeY / this.pxHeight,
+	      newWidth = rangeX / 10,
+	      newHeight = rangeY / 10,
+	      scaledUL = [cartX - newWidth / 2, cartY - newHeight / 2],
+	      scaledBR = [cartX + newWidth / 2, cartY + newHeight / 2]
 	
-	  var scaledUL = [],
-	      scaledBR = []
+	  this.upperLeft = scaledUL
+	  this.bottomRight = scaledBR
 	
+	  this.draw()
+	};
 	
+	MandelbrotImage.prototype.zoomOut = function() {
+	  if(this.zoomLevel) {
+	    var prevZoom = this.previousZooms.pop()
+	    this.upperLeft = prevZoom.ul
+	    this.bottomRight = prevZoom.br
+	    this.ctx.putImageData(prevZoom.data,0,0)
+	    this.zoomLevel--
+	  }
 	};
 	
 	MandelbrotImage.prototype.setChunkData = function (tl,delX,delY,chunk) {
 	  var d  = chunk.data
 	
 	  var currentPos = tl.slice(0,2),
-	      i = 0;
+	      i = 0,
+	      colorR = this.color[0],
+	      colorG = this.color[1],
+	      colorB = this.color[2],
+	      colorMagnitude;
 	
 	  while(i < d.length) {
-	    d[i++] = 0
-	    d[i++] = 0
 	    if(inCardioid(currentPos) || inMainDisk(currentPos)) {
-	      d[i++] = 0
+	      colorMagnitude = 0
 	    } else {
-	      d[i++] = iterate(currentPos,256)
+	      colorMagnitude = iterate(currentPos,256 * (this.zoomLevel + 1))
 	    }
+	    d[i++] = colorR * colorMagnitude
+	    d[i++] = colorG * colorMagnitude
+	    d[i++] = colorB * colorMagnitude
 	    d[i++] = 255
 	    if(Math.round(i / 4) % chunk.width == 0) {
 	      currentPos[1] += delY
@@ -143,8 +245,8 @@
 	      numYChunks = 3,
 	      tl = this.upperLeft,
 	      br = this.bottomRight,
-	      rangeX = br[0] - tl[0],
-	      rangeY = br[1] - tl[1],
+	      rangeX = this.range(0),
+	      rangeY = this.range(1),
 	      delX = rangeX / numXChunks,
 	      delY = rangeY / numYChunks,
 	      chunkDelX = rangeX / this.pxWidth,
@@ -169,6 +271,24 @@
 	    this.pxHeight / numYChunks
 	  )
 	  _chunk.call(this,0,0,chunk)
+	};
+	
+	MandelbrotImage.prototype.updateColor = function (rgbArray) {
+	  var originalData = this.ctx.getImageData(0,0,this.pxWidth,this.pxHeight),
+	      newColorVect = unitColorVect(rgbArray),
+	      newData = rotateColorData(this.ctx,originalData,newColorVect);
+	
+	
+	  this.color = newColorVect;
+	  this.ctx.putImageData(newData,0,0);
+	
+	  for (var i = 0; i < this.previousZooms.length; i++) {
+	    this.previousZooms[i].data = rotateColorData(
+	      this.ctx,
+	      this.previousZooms[i].data,
+	      newColorVect
+	    )
+	  }
 	};
 	
 	module.exports = MandelbrotImage;
@@ -203,7 +323,7 @@
 	    var iterator = [0,0];
 	    for(var i = 0; i < numSteps; i++) {
 	      iterator = squareAndAddComplexNum(iterator, pos);
-	      if(magnitude(iterator) > 256) return (1 - i / numSteps) * 255;
+	      if(magnitude(iterator) > 8) return (1 - i / numSteps) * 255;
 	    }
 	    return 0;
 	  },
@@ -227,6 +347,39 @@
 	    return false;
 	  }
 	};
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	var colors = ['#f00','#ff0','#0f0','#0ff','#00f','#f0f','#f00']
+	
+	var ColorGrad = function(ctx,updateCB) {
+	  this.ctx = ctx
+	  this.grad = ctx.createLinearGradient(0,0,ctx.canvas.width,0)
+	  for(var i = 0; i < 7; i++) {
+	    this.grad.addColorStop(i / 6, colors[i])
+	  }
+	  this.updateColor = updateCB
+	}
+	
+	ColorGrad.prototype.launch = function(xCorrection,yCorrection) {
+	  function resetColor(e) {
+	    var colorData = this.ctx.getImageData(
+	      Math.round(e.offsetX * xCorrection),
+	      Math.round(e.offsetY * yCorrection),
+	      1,
+	      1
+	    ).data.slice(0,3)
+	    this.updateColor(colorData)
+	  }
+	  this.ctx.fillStyle = this.grad
+	  this.ctx.fillRect(0,0,this.ctx.canvas.width,this.ctx.canvas.height)
+	  this.ctx.canvas.onclick = resetColor.bind(this)
+	};
+	
+	module.exports = ColorGrad;
 
 
 /***/ }

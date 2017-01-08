@@ -4,6 +4,30 @@ var squareAndAddComplexNum = require('./complex_utils').squareAndAddComplexNum,
     inCardioid = require('./complex_utils').inCardioid,
     inMainDisk = require('./complex_utils').inMainDisk;
 
+function unitColorVect(rgbArray) {
+  var floatArray = [] // rgbArray is UIntClampedArray, so .map will not return floats
+  rgbArray.forEach(function(el) {floatArray.push(el / 255)})
+  return floatArray;
+}
+
+function rotateColorData(ctx,originalData,newColorVect) {
+  var newData = ctx.createImageData(originalData.width,originalData.height),
+      newD = newData.data,
+      d = originalData.data,
+      i = 0,
+      colorMag;
+
+  while(i < d.length) {
+    colorMag = Math.max(d[i],d[i + 1],d[i + 2]);
+    newD[i++] = newColorVect[0] * colorMag;
+    newD[i++] = newColorVect[1] * colorMag;
+    newD[i++] = newColorVect[2] * colorMag;
+    newD[i++] = 255;
+  }
+
+  return newData
+}
+
 var MandelbrotImage = function(ctx,pxWidth,pxHeight) {
   this.ctx = ctx;
   this.upperLeft = [-2,1]
@@ -11,35 +35,68 @@ var MandelbrotImage = function(ctx,pxWidth,pxHeight) {
   this.pxWidth = pxWidth
   this.pxHeight = pxHeight
   this.zoomLevel = 0
-  // With zoom, can save previous zoom images to prevent reload time
+  this.previousZooms = []
+  this.color = [0,0,1]
+};
+
+MandelbrotImage.prototype.range = function (axis) {
+  return this.bottomRight[axis] - this.upperLeft[axis]
 };
 
 MandelbrotImage.prototype.zoomOnPosition = function (x,y) {
+  var ctx = this.ctx;
+
   this.zoomLevel++
+  this.previousZooms.push({
+    ul: this.upperLeft.slice(0,2),
+    br: this.bottomRight.slice(0,2),
+    data: ctx.getImageData(0,0,this.pxWidth,this.pxHeight)
+  })
 
-  var rangeX = this.bottomRight[0] - this.upperLeft[0],
-      rangeY = this.bottomRight[1] - this.upperLeft[1]
+  var rangeX = this.range(0),
+      rangeY = this.range(1),
+      cartX = this.upperLeft[0] + x * rangeX / this.pxWidth,
+      cartY = this.upperLeft[1] + y * rangeY / this.pxHeight,
+      newWidth = rangeX / 10,
+      newHeight = rangeY / 10,
+      scaledUL = [cartX - newWidth / 2, cartY - newHeight / 2],
+      scaledBR = [cartX + newWidth / 2, cartY + newHeight / 2]
 
-  var scaledUL = [],
-      scaledBR = []
+  this.upperLeft = scaledUL
+  this.bottomRight = scaledBR
 
+  this.draw()
+};
 
+MandelbrotImage.prototype.zoomOut = function() {
+  if(this.zoomLevel) {
+    var prevZoom = this.previousZooms.pop()
+    this.upperLeft = prevZoom.ul
+    this.bottomRight = prevZoom.br
+    this.ctx.putImageData(prevZoom.data,0,0)
+    this.zoomLevel--
+  }
 };
 
 MandelbrotImage.prototype.setChunkData = function (tl,delX,delY,chunk) {
   var d  = chunk.data
 
   var currentPos = tl.slice(0,2),
-      i = 0;
+      i = 0,
+      colorR = this.color[0],
+      colorG = this.color[1],
+      colorB = this.color[2],
+      colorMagnitude;
 
   while(i < d.length) {
-    d[i++] = 0
-    d[i++] = 0
     if(inCardioid(currentPos) || inMainDisk(currentPos)) {
-      d[i++] = 0
+      colorMagnitude = 0
     } else {
-      d[i++] = iterate(currentPos,256)
+      colorMagnitude = iterate(currentPos,256 * (this.zoomLevel + 1))
     }
+    d[i++] = colorR * colorMagnitude
+    d[i++] = colorG * colorMagnitude
+    d[i++] = colorB * colorMagnitude
     d[i++] = 255
     if(Math.round(i / 4) % chunk.width == 0) {
       currentPos[1] += delY
@@ -55,8 +112,8 @@ MandelbrotImage.prototype.draw = function () {
       numYChunks = 3,
       tl = this.upperLeft,
       br = this.bottomRight,
-      rangeX = br[0] - tl[0],
-      rangeY = br[1] - tl[1],
+      rangeX = this.range(0),
+      rangeY = this.range(1),
       delX = rangeX / numXChunks,
       delY = rangeY / numYChunks,
       chunkDelX = rangeX / this.pxWidth,
@@ -81,6 +138,24 @@ MandelbrotImage.prototype.draw = function () {
     this.pxHeight / numYChunks
   )
   _chunk.call(this,0,0,chunk)
+};
+
+MandelbrotImage.prototype.updateColor = function (rgbArray) {
+  var originalData = this.ctx.getImageData(0,0,this.pxWidth,this.pxHeight),
+      newColorVect = unitColorVect(rgbArray),
+      newData = rotateColorData(this.ctx,originalData,newColorVect);
+
+
+  this.color = newColorVect;
+  this.ctx.putImageData(newData,0,0);
+
+  for (var i = 0; i < this.previousZooms.length; i++) {
+    this.previousZooms[i].data = rotateColorData(
+      this.ctx,
+      this.previousZooms[i].data,
+      newColorVect
+    )
+  }
 };
 
 module.exports = MandelbrotImage;

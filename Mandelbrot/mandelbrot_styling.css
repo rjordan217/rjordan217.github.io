@@ -1,26 +1,212 @@
-body {
+html, body, header, nav, h1, a,
+ul, li, strong, main, button, i,
+section, img, div, h2, p, form,
+fieldset, label, input, textarea,
+span, article, footer, time, small, canvas {
   margin: 0;
   padding: 0;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  text-decoration: inherit;
+  vertical-align: inherit;
+  box-sizing: inherit;
+  background: transparent;
 }
 
-canvas {
-  margin: 0;
-  padding: 0;
+ul {
+  list-style: none;
+}
+
+img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+input[type="password"],
+input[type="email"],
+input[type="text"],
+input[type="submit"],
+textarea,
+button {
+  /*
+  Get rid of native styling. Read more here:
+  http://css-tricks.com/almanac/properties/a/appearance/
+  */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+button,
+input[type="submit"] {
+  cursor: pointer;
+}
+
+/* Clearfix */
+
+.group:after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+body {
+  background-color: rgb(233, 251, 255);
+  font-size: 20px;
+  font-family: 'Philosopher', sans-serif;
+  box-sizing: border-box;
+}
+
+h1 {
+  font-size: 3em;
+  text-align: center;
+}
+
+h2 {
+  font-size: 2em;
+}
+
+h3 {
+  font-size: 1.1em;
+}
+
+p {
+  text-indent: 2em;
+}
+
+a {
+  color: #47B0FF;
+}
+
+.main {
+  width: 90vw;
+  min-height: 100vh;
+  margin: auto;
+  background-color: rgb(237, 253, 255);
+  border: 1px solid #eee;
+  padding: 1%;
 }
 
 .content {
-  margin: auto;
-  padding: 0;
+  background-color: navy;
+  color: lightblue;
+  border-radius: 1em;
+  border: .25em outset #1969c0;
+  padding: .5em;
   display: flex;
   align-items: center;
-  flex-direction: column;
+  justify-content: space-between;
 }
 
-.group::after {
+.content::after {
   content: "";
   clear: both;
   display: block;
 }
+
+.intro-text {
+  width: 312px;
+  line-height: 1.3em;
+  padding: .5em;
+  background-color: lightblue;
+  border-radius: .5em;
+
+}
+
+.canvas-container {
+  position: relative;
+  width: 63%;
+  width: calc(100% - 350px);
+}
+
+.info-headers {
+  display: flex;
+  justify-content: center;
+}
+
+.info-header {
+  margin-left: 1px;
+  border-top-right-radius: .5em;
+  border-top-left-radius: .5em;
+  background-color: navy;
+  padding: .5em .5em 0 .5em;
+}
+
+.info-header h3 {
+  margin: .1em auto;
+}
+
+.info-header:hover h3 {
+  color: blue;
+}
+
+.info-header:hover .triangle {
+  border-bottom-color: blue;
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 15px solid lightblue;
+  margin: auto;
+}
+
+.info-sections {
+  background-color: navy;
+  padding: .5em 0;
+  border-radius: .5em;
+}
+
+.info-section {
+  padding: 0 1em;
+}
+
+#info-instructions p {
+  text-indent: 0;
+}
+
+.equation {
+  display: inline-block;
+}
+
+i {
+  font-style: italic;
+}
+
+canvas {
+    border: 1px solid black;
+    cursor: crosshair;
+    position: relative;
+    width: 100%;
+}
+
+canvas:hover {
+    border: 0;
+    box-shadow: 0 0 3px 3px aqua;
+}
+
+#zoom-out {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  background-color: navy;
+  padding: 8px;
+  border-bottom-left-radius: 8px;
+  border: 1px solid black;
+  border-width: 0 0 1px 1px;
+}
+
+#zoom-out:hover {
+  background-color: lightblue;
+  color: navy;
+}
+
+/*Here's where it starts*/
 
 .ellipsis-outer {
   width: 1200px;

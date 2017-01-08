@@ -3,21 +3,64 @@
   <head>
     <meta charset="utf-8">
     <title>Mandelbrot</title>
+    <link href="https://fonts.googleapis.com/css?family=Philosopher:400,700,400italic" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="./mandelbrot_styling.css" charset="utf-8">
+
   </head>
   <body>
-    <div class="content after">
-      <h2 class="loading">Generating Mandelbrot...</h2>
-      <div class="loading ellipsis-outer" width="1200" height="900">
-        <div class="ellipsis-inner">
-          <div class="ellipsis-dot" id="dot1"></div>
-          <div class="ellipsis-dot" id="dot2"></div>
-          <div class="ellipsis-dot" id="dot3"></div>
+    <div class="main">
+      <h1>The Mandelbrot Set</h1>
+      <hr>
+      <section class="content">
+        <div class="intro-text">
+          <header class="info-headers">
+            <div class="info-header">
+              <h3>About</h3>
+              <div class="triangle"></div>
+            </div>
+            <div class="info-header">
+              <h3>How To</h3>
+              <div class="triangle"></div>
+            </div>
+          </header>
+          <section class="info-sections">
+            <div class="info-section" id="info-about">
+              <p>The Mandelbrot generator is a project I would like to dedicate
+                to all my fellow math enthusiasts out there. Even non-mathematically
+                inclined people must marvel at the beauty of this amazing fractal set.
+                The definition of the Mandelbrot is actually quite simple, though
+                the final product is so complex. The
+                <a
+                  href="https://en.wikipedia.org/wiki/Mandelbrot_set"
+                  title="More information here">Mandelbrot set</a> is made up of
+                  all points in the complex plane <i>c</i> for which the image
+                  of the complex function
+                  <div class="equation"><i>f(z) = z</i><sup>2</sup> + <i>c</i></div>
+                  , when applied iteratively starting with <i>z</i> = 0, remains
+                  bounded (i.e., does not escape to infinity).</p>
+            </div>
+            <div class="info-section" id="info-instructions">
+              <p>- Doubleclick to zoom</p>
+              <p>- Click "Zoom Out" button to zoom out</p>
+              <p>- Click a color on the gradient bar to change color scheme</p>
+            </div>
+          </section>
         </div>
-      </div>
-      <canvas id="mandelbrot-canvas" width="1200" height="900"></canvas>
+        <div class="canvas-container">
+          <h2 class="loading">Generating Mandelbrot...</h2>
+          <div class="loading ellipsis-outer" width="1200" height="900">
+            <div class="ellipsis-inner">
+              <div class="ellipsis-dot" id="dot1"></div>
+              <div class="ellipsis-dot" id="dot2"></div>
+              <div class="ellipsis-dot" id="dot3"></div>
+            </div>
+          </div>
+          <canvas id="mandelbrot-canvas" width="1200" height="900"></canvas>
+          <canvas id="color-canvas" width="1200" height="20"></canvas>
+          <button id="zoom-out">Zoom Out</button>
+        </div>
+      </section>
     </div>
-    <script src="../javascripts/jquery-1.12.3.min.js" charset="utf-8"></script>
     <script src="./mandelbrot_bundle.js" charset="utf-8"></script>
   </body>
 </html>
