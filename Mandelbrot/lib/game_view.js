@@ -31,7 +31,6 @@ GameView.prototype.launch = function() {
   );
   this.mandelCanvEl.style.display = "block";
   var zoomOut = document.getElementById("zoom-out")
-  zoomOut.innerHTML = "Zoom Out"
   zoomOut.onclick = this.image.zoomOut.bind(this.image)
   this.mandelCanvEl.parentElement.appendChild(zoomOut)
 

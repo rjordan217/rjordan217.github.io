@@ -17,7 +17,7 @@ ColorGrad.prototype.launch = function(xCorrection,yCorrection) {
       1,
       1
     ).data.slice(0,3)
-    this.updateColor(colorData)
+    if(colorData[0] || colorData[1] || colorData[2]) this.updateColor(colorData);
   }
   this.ctx.fillStyle = this.grad
   this.ctx.fillRect(0,0,this.ctx.canvas.width,this.ctx.canvas.height)

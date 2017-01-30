@@ -13,7 +13,7 @@ infoContent = Array.prototype.slice.call(infoContent, 0, infoContent.length);
 
 
 function displaySection(idx) {
-  infoContent.forEach((el, i) => {
+  infoContent.forEach(function(el, i) {
     if(idx == i) {
       el.style.display = "block";
     } else {
@@ -22,8 +22,8 @@ function displaySection(idx) {
   });
 }
 
-infoHeaders.forEach((el, idx) => {
-  el.onclick = (e) => {
+infoHeaders.forEach(function(el, idx) {
+  el.onclick = function(e) {
     e.preventDefault();
     displaySection(idx);
   };
