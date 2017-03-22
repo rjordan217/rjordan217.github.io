@@ -17,6 +17,19 @@
       ga('send', 'pageview');
 
     </script>
+    <script type="text/javascript">
+      function loadCSS(styleNames) {
+        var head = document.getElementsByTagName('head')[0]
+        styleNames.forEach(function(fileNom) {
+          var newEl = document.createElement('link');
+          newEl.rel = "stylesheet"
+          newEl.href = fileNom
+          head.appendChild(newEl)
+        })
+      }
+
+      //TODO: Setup ServiceWorker
+    </script>
   </head>
   <body>
 

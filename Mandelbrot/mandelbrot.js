@@ -1,7 +1,8 @@
 var mandelCanvEl = document.getElementById('mandelbrot-canvas'),
     colorGradEl = document.getElementById('color-canvas'),
+    zoomButton = document.getElementById('zoom-out'),
     GameView = require('./lib/game_view'),
-    mandel = new GameView(mandelCanvEl,colorGradEl);
+    mandel = new GameView(mandelCanvEl,colorGradEl,zoomButton);
 
 setTimeout(mandel.launch.bind(mandel), 50);
 

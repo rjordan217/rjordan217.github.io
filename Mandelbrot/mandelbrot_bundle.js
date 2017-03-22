@@ -128,7 +128,7 @@ module.exports = {
 var MandelbrotImage = __webpack_require__(3),
     ColorGrad = __webpack_require__(2);
 
-var GameView = function(mandelCanvEl,colorCanvEl) {
+var GameView = function(mandelCanvEl,colorCanvEl,zoomButton) {
   this.mandelCanvEl = mandelCanvEl;
   this.image = new MandelbrotImage(
     mandelCanvEl.getContext('2d'),
@@ -139,7 +139,8 @@ var GameView = function(mandelCanvEl,colorCanvEl) {
   this.colorGrad = new ColorGrad(
     colorCanvEl.getContext('2d'),
     this.image.updateColor.bind(this.image)
-  )
+  );
+  this.zoomOut = zoomButton;
 };
 
 GameView.prototype.launch = function() {
@@ -149,22 +150,25 @@ GameView.prototype.launch = function() {
       e.offsetY * this.mandelCanvEl.height / this.mandelCanvEl.clientHeight
     )
     this.image.draw()
+    this.toggleZoom()
   }.bind(this)
 
   this.image.draw();
-  [].forEach.call(
-    document.getElementsByClassName('loading'),
-    function(el) {el.style.display = "none"}
-  );
-  this.mandelCanvEl.style.display = "block";
-  var zoomOut = document.getElementById("zoom-out")
-  zoomOut.onclick = this.image.zoomOut.bind(this.image)
-  this.mandelCanvEl.parentElement.appendChild(zoomOut)
+  this.toggleZoom();
+
+  this.zoomOut.onclick = function(){
+    this.image.zoomOut()
+    this.toggleZoom()
+  }.bind(this)
 
   this.colorGrad.launch(
     this.colorCanvEl.width / this.colorCanvEl.clientWidth,
     this.colorCanvEl.height / this.colorCanvEl.clientHeight
   )
+};
+
+GameView.prototype.toggleZoom = function () {
+  this.zoomOut.disabled = !this.image.zoomLevel
 };
 
 module.exports = GameView;
@@ -376,8 +380,9 @@ module.exports = MandelbrotImage;
 
 var mandelCanvEl = document.getElementById('mandelbrot-canvas'),
     colorGradEl = document.getElementById('color-canvas'),
+    zoomButton = document.getElementById('zoom-out'),
     GameView = __webpack_require__(1),
-    mandel = new GameView(mandelCanvEl,colorGradEl);
+    mandel = new GameView(mandelCanvEl,colorGradEl,zoomButton);
 
 setTimeout(mandel.launch.bind(mandel), 50);
 
@@ -389,7 +394,7 @@ infoContent = Array.prototype.slice.call(infoContent, 0, infoContent.length);
 
 
 function displaySection(idx) {
-  infoContent.forEach((el, i) => {
+  infoContent.forEach(function(el, i) {
     if(idx == i) {
       el.style.display = "block";
     } else {
@@ -398,8 +403,8 @@ function displaySection(idx) {
   });
 }
 
-infoHeaders.forEach((el, idx) => {
-  el.onclick = (e) => {
+infoHeaders.forEach(function(el, idx) {
+  el.onclick = function(e) {
     e.preventDefault();
     displaySection(idx);
   };

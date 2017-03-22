@@ -99,10 +99,12 @@ input[type="submit"]:active {
   left: auto;
   z-index: 0;
   cursor: crosshair;
+  border-radius: 10px;
 }
 
 .overlay {
   position: absolute;
+  border-radius: 10px;
   top: 0;
   left: 0;
   z-index: 2;

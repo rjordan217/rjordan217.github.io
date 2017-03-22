@@ -55,22 +55,23 @@ input[type="submit"] {
 
 body {
   background-color: rgb(233, 251, 255);
-  font-size: 20px;
+  font-size: 24px;
   font-family: 'Philosopher', sans-serif;
   box-sizing: border-box;
 }
 
 h1 {
-  font-size: 3em;
+  font-size: 3rem;
   text-align: center;
 }
 
 h3 {
-  font-size: 1.1em;
+  font-size: 1.3rem;
 }
 
 p {
   text-indent: 2em;
+  font-size: 1.2rem;
 }
 
 a {
@@ -113,18 +114,17 @@ a {
 }
 
 .intro-text {
-  width: 312px;
   line-height: 1.3em;
   padding: .5em;
   background-color: lightblue;
   border-radius: .5em;
-
+  flex: 1 2 312px;
 }
 
 .canvas-container {
   position: relative;
-  width: 63%;
-  width: calc(100% - 350px);
+  flex: 2 1 50vmax;
+  margin: 5px;
 }
 
 .info-headers {
@@ -138,6 +138,7 @@ a {
   border-top-left-radius: .5em;
   background-color: navy;
   padding: .5em .5em 0 .5em;
+  flex-grow: 1;
 }
 
 .info-header h3 {
@@ -223,8 +224,8 @@ canvas:hover {
 }
 
 #button-container img {
-  width: 2em;
-  height: 2em;
+  width: 1.5em;
+  height: 1.5em;
   background-color: silver;
   border: 1px solid black;
   border-radius: .2em;
@@ -245,4 +246,12 @@ canvas:hover {
 
 .minimized > img {
   display: none;
+}
+
+@media (max-width: 1000px) {
+  .content{flex-direction: column-reverse;}
+  .intro-text{flex-basis: auto;}
+  .info-sections{border-radius: .5em;}
+  .info-header{flex-grow: 0;}
+  .canvas-container{flex-basis: auto;}
 }

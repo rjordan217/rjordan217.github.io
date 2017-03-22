@@ -1,4 +1,9 @@
 /PoolProject/game.html
 /PoolProject/todo.txt
 /PoolProject/lib/phased_out_code.js
+web_content
+web_editor_plan.txt
 .gitignore
+/node_modules
+package.json
+webpack.config.js
