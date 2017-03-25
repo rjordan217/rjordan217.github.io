@@ -1,3 +1,8 @@
+window.isMobile = false;
+if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+    .test(navigator.userAgent)) window.isMobile = true;
+
+
 var mandelCanvEl = document.getElementById('mandelbrot-canvas'),
     colorGradEl = document.getElementById('color-canvas'),
     zoomButton = document.getElementById('zoom-out'),

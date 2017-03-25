@@ -6,15 +6,18 @@
     <script src="../javascripts/jquery-1.12.3.min.js" charset="utf-8"></script>
     <link rel="stylesheet" href="../stylesheets/pool_styling.css" media="screen" charset="utf-8">
     <link rel="icon" href="../res/personal_logo.ico" type="image/gif" sizes="32x32">
+    <link href="https://fonts.googleapis.com/css?family=Philosopher:400,700,400italic" rel="stylesheet" type="text/css">
   </head>
   <body>
-    <header>
-      <h1 class="name" onclick="scroll(0,0)">Ryan<span class="accent-color">Jordan</span></h1>
+    <header class="site-header">
+      <h1 class="name">
+        <a href="../index.html">Ryan<span class="accent-color">Jordan</span></a>
+      </h1>
 
       <div class="nav-content">
-        <a href="#about" class="nav-item">About</a>
-        <a href="#proyectos" class="nav-item">Projects</a>
-        <a href="./Resume.pdf" class="nav-item">Résumé</a>
+        <a href="../index.html#about" class="nav-item">About</a>
+        <a href="../index.html#proyectos" class="nav-item">Projects</a>
+        <a href="../Resume.pdf" class="nav-item">Résumé</a>
         <div class="nav-item contact">Contact
           <div class="contact-box group">
             <a
@@ -30,7 +33,7 @@
         </div>
       </div>
     </header>
-    
+
     <div class="pool-game">
       <canvas id="pool-canvas" width="1100" height="700"></canvas>
     </div>

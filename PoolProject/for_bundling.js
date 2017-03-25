@@ -1,3 +1,7 @@
+window.isMobile = false;
+if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+    .test(navigator.userAgent)) window.isMobile = true;
+
 DIM_X = 1100;
 DIM_Y = 700;
 var toSize = Math.min(DIM_X / 2, DIM_Y);

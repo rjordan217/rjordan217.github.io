@@ -238,15 +238,21 @@ p {
   margin: 20px;
 }
 
+.projects-flex a {
+  flex-basis: 28ch;
+  height: 14ch;
+  margin: 1.5ch;
+}
+
 .project {
-    width: 25vw;
-    height: 25vh;
     margin: auto;
     opacity: .8;
     text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
+    height: 100%;
 }
 
 .project:hover {
@@ -261,30 +267,18 @@ p {
 
 .nine-ball {
   background: url('../res/nineball_pic.png');
-  background-size: 100% auto;
-  background-repeat: no-repeat;
-  background-position: center;
 }
 
 .petsy {
   background: url('../res/Petsy.png');
-  background-size: 100% auto;
-  background-repeat: no-repeat;
-  background-position: center;
 }
 
 .rails-lite {
   background: url('../res/railslite_snippet.png');
-  background-size: 100% auto;
-  background-repeat: no-repeat;
-  background-position: center;
 }
 
 .js-calligrapher {
-  background: url('../res/calligrapher_snapshot.png');
-  background-size: 100% auto;
-  background-repeat: no-repeat;
-  background-position: center;
+  background:  rgba(132, 175, 255, 0.95) url('../res/calligrapher_snapshot.png');
 }
 
 .js-calligrapher h2 {
@@ -293,6 +287,10 @@ p {
 
 .mandelbrot {
   background: url('../res/mandelbrot.png');
+}
+
+.project {
+  margin: 1em;
   background-size: 100% auto;
   background-repeat: no-repeat;
   background-position: center;
@@ -303,7 +301,6 @@ p {
   height: 0;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-
   border-bottom: 5px solid black;
 }
 
@@ -362,6 +359,7 @@ footer {
   height:50px;
   margin-top: 5px;
   opacity: .8;
+  background-size: cover;
 }
 
 .icon:first-child {
@@ -374,17 +372,14 @@ footer {
 
 .linkedin {
   background-image: url('../res/linked-in-no-bg.png');
-  background-size: cover;
 }
 
 .email {
   background-image: url('../res/at_symbol.svg');
-  background-size: cover;
 }
 
 .github {
   background-image: url('../res/github-no-bg.png');
-  background-size: cover;
 }
 
 .left {

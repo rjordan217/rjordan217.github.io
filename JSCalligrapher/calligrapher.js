@@ -1,3 +1,7 @@
+window.isMobile = false;
+if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+    .test(navigator.userAgent)) window.isMobile = true;
+
 var drawCanvasEl = document.getElementById('drawing-canvas'),
     ctx = drawCanvasEl.getContext('2d'),
     editCanvasEl = document.getElementById('edit-canvas'),
@@ -130,26 +134,44 @@ function moveButtonsWithMouse(e) {
       canvasRect = parent.getBoundingClientRect();
 
   buttonDiv.style.right = (canvasRect.right - (e.clientX + delX)) + "px";
-  buttonDiv.style.top = ((e.clientY - delY) - canvasRect.top) + "px";// ▼
+  buttonDiv.style.top = ((e.clientY - delY) - canvasRect.top) + "px";
 }
 
-movebar.onmousedown = function(e) {
-  e.preventDefault();
+if(window.isMobile) {
+  movebar.addEventListener('touchstart',function(e){
+    e.preventDefault();
 
-  var buttonsRect = movebar.getBoundingClientRect();
+    var buttonsRect = movebar.getBoundingClientRect(),
+        touchE = e.targetTouches[0];
 
-  movebarClicked = true;
-  delX = buttonsRect.right - e.clientX;
-  delY = e.clientY - buttonsRect.top;
-}
-parent.onmousemove = function(e) {
-  if(movebarClicked) {
-    moveButtonsWithMouse(e);
+    movebarClicked = true;
+    delX = buttonsRect.right - touchE.clientX;
+    delY = touchE.clientY - buttonsRect.top;
+  })
+  parent.addEventListener('touchmove',function(e) {
+    if(movebarClicked) {
+      e = e.targetTouches[0]
+      moveButtonsWithMouse(e);
+    }
+  })
+  document.addEventListener('touchend',function(e){movebarClicked = false;})
+} else {
+  movebar.onmousedown = function(e) {
+    e.preventDefault();
+
+    var buttonsRect = movebar.getBoundingClientRect();
+
+    movebarClicked = true;
+    delX = buttonsRect.right - e.clientX;
+    delY = e.clientY - buttonsRect.top;
   }
-}
-document.onmouseup = function(e) {
-  e.preventDefault();
-  movebarClicked = false;
+  parent.onmousemove = function(e) {
+    if(movebarClicked) moveButtonsWithMouse(e);
+  }
+  document.onmouseup = function(e) {
+    e.preventDefault();
+    movebarClicked = false;
+  }
 }
 
 var minimized = false;

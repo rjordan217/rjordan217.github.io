@@ -125,6 +125,7 @@ a {
   position: relative;
   flex: 2 1 50vmax;
   margin: 5px;
+  touch-action:none;
 }
 
 .info-headers {
@@ -253,5 +254,5 @@ canvas:hover {
   .intro-text{flex-basis: auto;}
   .info-sections{border-radius: .5em;}
   .info-header{flex-grow: 0;}
-  .canvas-container{flex-basis: auto;}
+  .canvas-container{flex-basis:auto;}
 }

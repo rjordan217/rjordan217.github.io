@@ -49,14 +49,10 @@ Cuestick.prototype.resetDrawn = function () {
 };
 
 Cuestick.prototype.clickedBinder = function (renderCB, e) {
-  e.preventDefault();
-  if(!this.disabled) {
-    this.isClicked = true;
-  }
+  if(!this.disabled) this.isClicked = true;
 };
 
 Cuestick.prototype.unclickedBinder = function (renderCB, turnCB, e) {
-  e.preventDefault();
   if (!this.disabled && this.isClicked) this.fire(renderCB, turnCB);
   this.isClicked = false;
 };
@@ -79,33 +75,30 @@ Cuestick.prototype.hoverBinder = function (renderCB, e) {
 };
 
 Cuestick.prototype.bindKeys = function (renderCB, turnCB) {
-
-  this.mousedownListener = this.clickedBinder.bind(this, renderCB);
-  document.addEventListener(
-    "mousedown",
-    this.mousedownListener,
-    true
-  );
-
-  this.mouseupListener = this.unclickedBinder.bind(this, renderCB, turnCB);
-  document.addEventListener(
-    "mouseup",
-    this.mouseupListener,
-    true
-  );
-
-  this.mousemoveListener = this.hoverBinder.bind(this, renderCB);
-  document.addEventListener(
-    "mousemove",
-    this.mousemoveListener,
-    true
-  );
+  var self = this;
+  if(window.isMobile) {
+    this.touchstartListener = function(e){self.clickedBinder(renderCB,e.targetTouches[0])}
+    this.touchmoveListener = function(e){self.hoverBinder(renderCB,e.targetTouches[0])}
+    this.touchendListener = function(e){self.unclickedBinder(renderCB,turnCB,e.targetTouches[0])}
+    this.eNames = ['touchstart','touchmove','touchend'];
+  } else {
+    this.mousedownListener = this.clickedBinder.bind(this, renderCB);
+    this.mouseupListener = this.unclickedBinder.bind(this, renderCB, turnCB);
+    this.mousemoveListener = this.hoverBinder.bind(this, renderCB);
+    this.eNames = ['mousedown','mousemove','mouseup'];
+  }
+  this.eNames.forEach(function(eName){
+    document.addEventListener(eName,this[eName + 'Listener'],true);
+  }.bind(this))
 };
 
 Cuestick.prototype.unbindKeys = function () {
-  document.removeEventListener("mousedown", this.mousedownListener, true);
-  document.removeEventListener("mouseup", this.mouseupListener, true);
-  document.removeEventListener("mousemove", this.mousemoveListener, true);
+  this.eventNames.forEach(function(eName){
+    document.removeEventListener(eName,this[eName + "Listener"],true);
+  }.bind(this))
+  // document.removeEventListener("mousedown", this.mousedownListener, true);
+  // document.removeEventListener("mouseup", this.mouseupListener, true);
+  // document.removeEventListener("mousemove", this.mousemoveListener, true);
 };
 
 Cuestick.prototype.updateCueball = function (newCueball) {

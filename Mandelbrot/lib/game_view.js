@@ -17,14 +17,31 @@ var GameView = function(mandelCanvEl,colorCanvEl,zoomButton) {
 };
 
 GameView.prototype.launch = function() {
-  this.mandelCanvEl.ondblclick = function(e) {
+  function zoomIn(e) {
     this.image.zoomOnPosition(
       e.offsetX * this.mandelCanvEl.width / this.mandelCanvEl.clientWidth,
       e.offsetY * this.mandelCanvEl.height / this.mandelCanvEl.clientHeight
     )
     this.image.draw()
     this.toggleZoom()
-  }.bind(this)
+  }
+
+  if(window.isMobile) {
+    this.mandelCanvEl.addEventListener('touchstart',function(e) {
+      this.dblTapped = this.dblTapped || false;
+      if(this.dblTapped) {
+        var rect = e.target.getBoundingClientRect();
+        e.offsetX = e.targetTouches[0].pageX - rect.left;
+        e.offsetY = e.targetTouches[0].pageY - rect.top;
+        zoomIn.call(this,e);
+        this.dblTapped = false;
+      }
+      setTimeout(function(){this.dblTapped = false}.bind(this),200)
+      this.dblTapped = true;
+    }.bind(this))
+  } else {
+    this.mandelCanvEl.ondblclick = zoomIn.bind(this)
+  }
 
   this.image.draw();
   this.toggleZoom();

@@ -2,7 +2,13 @@ var diffVector = require('./vector_utils').diffVector;
 
 var FindBezierTool = function(ctx) {
   this.ctx = ctx;
-  this.controlPoints = [[16,16],[46,16],[76, 16],[106,16]];
+  if(window.isMobile) {
+    this.controlPoints = [[26,26],[116,26],[206,26],[296,26]];
+    this.cptsRad = 15;
+  } else {
+    this.controlPoints = [[16,16],[46,16],[76, 16],[106,16]];
+    this.cptsRad = 5;
+  }
   this.clickedPoint = null;
   this.offsetBeforePoint = null;
   this.offsetAfterPoint = null;
@@ -35,7 +41,7 @@ FindBezierTool.prototype.drawControlPoints = function () {
     ctx.arc(
       this.controlPoints[i][0],
       this.controlPoints[i][1],
-      5,
+      this.cptsRad,
       0,
       2 * Math.PI,
       false
@@ -46,7 +52,9 @@ FindBezierTool.prototype.drawControlPoints = function () {
 };
 
 FindBezierTool.prototype.drawBezier = function () {
-  var ctx = this.ctx;
+  var ctx = this.ctx,
+      preDrawWidth = ctx.lineWidth;
+  if(window.isMobile) ctx.lineWidth = 3;
   ctx.strokeStyle = this.color;
   ctx.beginPath();
   var ctrlPts = this.controlPoints;
@@ -60,6 +68,7 @@ FindBezierTool.prototype.drawBezier = function () {
     ctrlPts[3][1]
   );
   ctx.stroke();
+  if(window.isMobile) ctx.lineWidth = preDrawWidth;
 };
 
 var dist = function(pos1, pos2) {

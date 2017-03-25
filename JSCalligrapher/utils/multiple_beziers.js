@@ -26,9 +26,10 @@ MultipleBeziers.prototype.addBezier = function () {
 };
 
 MultipleBeziers.prototype.bindMouse = function (el) {
-  el.addEventListener("mousedown", function(e) {
-    var beziers = this.beziers,
-        currIdx = this.currentIdx;
+  var self = this;
+  function down(e) {
+    var beziers = self.beziers,
+        currIdx = self.currentIdx;
     if(beziers.length) {
       beziers[currIdx].clickedPoint = beziers[currIdx].detectClickRegion(e)
       if(beziers[currIdx].clickedPoint == null) {
@@ -36,24 +37,33 @@ MultipleBeziers.prototype.bindMouse = function (el) {
           if(idx !== currIdx) {
             beziers[idx].clickedPoint = beziers[idx].detectClickRegion(e);
             if(beziers[idx].clickedPoint !== null) {
-              this.switchCurrent(idx);
+              self.switchCurrent(idx);
               break;
             }
           }
         }
       }
     }
-    this.draw();
-  }.bind(this));
-  el.addEventListener("mousemove", function(e) {
-    if(this.beziers[this.currentIdx]) this.beziers[this.currentIdx].moveWithMouse(e);
-    this.draw();
-  }.bind(this));
-  el.addEventListener("mouseup", function(e) {
-    this.beziers.forEach(function(bezier) {
+    self.draw();
+  }
+  function move(e) {
+    if(self.beziers[self.currentIdx]) self.beziers[self.currentIdx].moveWithMouse(e);
+    self.draw();
+  }
+  function up(e) {
+    self.beziers.forEach(function(bezier) {
       bezier.clickedPoint = null;
     });
-  }.bind(this));
+  }
+  if(window.isMobile) {
+    el.addEventListener("touchstart", function(e){down(e.targetTouches[0])});
+    el.addEventListener("touchmove", function(e){move(e.targetTouches[0])});
+    el.addEventListener("touchend", function(e){up(e.targetTouches[0])});
+  } else {
+    el.addEventListener("mousedown", down);
+    el.addEventListener("mousemove", move);
+    el.addEventListener("mouseup", up);
+  }
 };
 
 MultipleBeziers.prototype.outputFullInstructions = function () {

@@ -44,6 +44,10 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
+	window.isMobile = false;
+	if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+	    .test(navigator.userAgent)) window.isMobile = true;
+	
 	var drawCanvasEl = document.getElementById('drawing-canvas'),
 	    ctx = drawCanvasEl.getContext('2d'),
 	    editCanvasEl = document.getElementById('edit-canvas'),
@@ -176,26 +180,44 @@
 	      canvasRect = parent.getBoundingClientRect();
 	
 	  buttonDiv.style.right = (canvasRect.right - (e.clientX + delX)) + "px";
-	  buttonDiv.style.top = ((e.clientY - delY) - canvasRect.top) + "px";// ▼
+	  buttonDiv.style.top = ((e.clientY - delY) - canvasRect.top) + "px";
 	}
 	
-	movebar.onmousedown = function(e) {
-	  e.preventDefault();
+	if(window.isMobile) {
+	  movebar.addEventListener('touchstart',function(e){
+	    e.preventDefault();
 	
-	  var buttonsRect = movebar.getBoundingClientRect();
+	    var buttonsRect = movebar.getBoundingClientRect(),
+	        touchE = e.targetTouches[0];
 	
-	  movebarClicked = true;
-	  delX = buttonsRect.right - e.clientX;
-	  delY = e.clientY - buttonsRect.top;
-	}
-	parent.onmousemove = function(e) {
-	  if(movebarClicked) {
-	    moveButtonsWithMouse(e);
+	    movebarClicked = true;
+	    delX = buttonsRect.right - touchE.clientX;
+	    delY = touchE.clientY - buttonsRect.top;
+	  })
+	  parent.addEventListener('touchmove',function(e) {
+	    if(movebarClicked) {
+	      e = e.targetTouches[0]
+	      moveButtonsWithMouse(e);
+	    }
+	  })
+	  document.addEventListener('touchend',function(e){movebarClicked = false;})
+	} else {
+	  movebar.onmousedown = function(e) {
+	    e.preventDefault();
+	
+	    var buttonsRect = movebar.getBoundingClientRect();
+	
+	    movebarClicked = true;
+	    delX = buttonsRect.right - e.clientX;
+	    delY = e.clientY - buttonsRect.top;
 	  }
-	}
-	document.onmouseup = function(e) {
-	  e.preventDefault();
-	  movebarClicked = false;
+	  parent.onmousemove = function(e) {
+	    if(movebarClicked) moveButtonsWithMouse(e);
+	  }
+	  document.onmouseup = function(e) {
+	    e.preventDefault();
+	    movebarClicked = false;
+	  }
 	}
 	
 	var minimized = false;
@@ -370,9 +392,10 @@
 	};
 	
 	MultipleBeziers.prototype.bindMouse = function (el) {
-	  el.addEventListener("mousedown", function(e) {
-	    var beziers = this.beziers,
-	        currIdx = this.currentIdx;
+	  var self = this;
+	  function down(e) {
+	    var beziers = self.beziers,
+	        currIdx = self.currentIdx;
 	    if(beziers.length) {
 	      beziers[currIdx].clickedPoint = beziers[currIdx].detectClickRegion(e)
 	      if(beziers[currIdx].clickedPoint == null) {
@@ -380,24 +403,33 @@
 	          if(idx !== currIdx) {
 	            beziers[idx].clickedPoint = beziers[idx].detectClickRegion(e);
 	            if(beziers[idx].clickedPoint !== null) {
-	              this.switchCurrent(idx);
+	              self.switchCurrent(idx);
 	              break;
 	            }
 	          }
 	        }
 	      }
 	    }
-	    this.draw();
-	  }.bind(this));
-	  el.addEventListener("mousemove", function(e) {
-	    if(this.beziers[this.currentIdx]) this.beziers[this.currentIdx].moveWithMouse(e);
-	    this.draw();
-	  }.bind(this));
-	  el.addEventListener("mouseup", function(e) {
-	    this.beziers.forEach(function(bezier) {
+	    self.draw();
+	  }
+	  function move(e) {
+	    if(self.beziers[self.currentIdx]) self.beziers[self.currentIdx].moveWithMouse(e);
+	    self.draw();
+	  }
+	  function up(e) {
+	    self.beziers.forEach(function(bezier) {
 	      bezier.clickedPoint = null;
 	    });
-	  }.bind(this));
+	  }
+	  if(window.isMobile) {
+	    el.addEventListener("touchstart", function(e){down(e.targetTouches[0])});
+	    el.addEventListener("touchmove", function(e){move(e.targetTouches[0])});
+	    el.addEventListener("touchend", function(e){up(e.targetTouches[0])});
+	  } else {
+	    el.addEventListener("mousedown", down);
+	    el.addEventListener("mousemove", move);
+	    el.addEventListener("mouseup", up);
+	  }
 	};
 	
 	MultipleBeziers.prototype.outputFullInstructions = function () {
@@ -439,7 +471,13 @@
 	
 	var FindBezierTool = function(ctx) {
 	  this.ctx = ctx;
-	  this.controlPoints = [[16,16],[46,16],[76, 16],[106,16]];
+	  if(window.isMobile) {
+	    this.controlPoints = [[26,26],[116,26],[206,26],[296,26]];
+	    this.cptsRad = 15;
+	  } else {
+	    this.controlPoints = [[16,16],[46,16],[76, 16],[106,16]];
+	    this.cptsRad = 5;
+	  }
 	  this.clickedPoint = null;
 	  this.offsetBeforePoint = null;
 	  this.offsetAfterPoint = null;
@@ -472,7 +510,7 @@
 	    ctx.arc(
 	      this.controlPoints[i][0],
 	      this.controlPoints[i][1],
-	      5,
+	      this.cptsRad,
 	      0,
 	      2 * Math.PI,
 	      false
@@ -483,7 +521,9 @@
 	};
 	
 	FindBezierTool.prototype.drawBezier = function () {
-	  var ctx = this.ctx;
+	  var ctx = this.ctx,
+	      preDrawWidth = ctx.lineWidth;
+	  if(window.isMobile) ctx.lineWidth = 3;
 	  ctx.strokeStyle = this.color;
 	  ctx.beginPath();
 	  var ctrlPts = this.controlPoints;
@@ -497,6 +537,7 @@
 	    ctrlPts[3][1]
 	  );
 	  ctx.stroke();
+	  if(window.isMobile) ctx.lineWidth = preDrawWidth;
 	};
 	
 	var dist = function(pos1, pos2) {
