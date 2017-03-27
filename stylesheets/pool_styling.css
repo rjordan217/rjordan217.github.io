@@ -82,13 +82,17 @@ input[type="submit"]:active {
 
 /* Start Navigation bar styling */
 
-header.site-header {
+.menu-and-name > * {
+  display: inline-block;
+  font-size: 2em;
+}
+
+.site-header {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  width: auto;
   padding: 5px 10px;
-  font-size: 20px;
   font-family: 'Philosopher', sans-serif;
   display: flex;
   justify-content: space-between;
@@ -98,19 +102,39 @@ header.site-header {
   z-index: 9;
 }
 
-header.site-header .accent-color {
+.site-header.displayed {
+  width: 100%;
+}
+
+.displayed .nav-content {
+  display: flex;
+}
+
+.displayed .name {
+  display: inline-block;
+}
+
+.displayed #menu-icon {
+  font-size: 1.5em;
+}
+
+.site-header .accent-color {
   color: #47B0FF;
 }
 
+#menu-icon {
+  font-size: 2em;
+}
+
 .name {
+  display: none;
   font-size: 2em;
   font-weight: bold;
 }
 
 .nav-content {
-  display: flex;
+  display: none;
   justify-content: space-around;
-  margin-right: 10px;
   z-index: 9;
 }
 
@@ -149,6 +173,7 @@ header.site-header .accent-color {
   background-color:aliceblue;
   border: 1px solid lightblue;
   border-radius: 10px;
+  box-sizing: content-box;
 }
 
 .icon {
@@ -403,4 +428,8 @@ button {
   padding: 10px;
   text-align: center;
   border-radius: 10px;
+}
+
+@media (max-width: 1100px) and (orientation: landscape) {
+  .pool-game{margin:auto}
 }

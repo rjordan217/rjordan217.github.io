@@ -55,7 +55,11 @@ Game.prototype.addPlayers = function (playerNames) {
 };
 
 Game.prototype.startGame = function () {
-  this.cuestick.bindKeys(this.drawTable.bind(this), this.runTurn.bind(this));
+  this.cuestick.bindKeys(
+    this.drawTable.bind(this),
+    this.runTurn.bind(this),
+    this.ctx.canvas
+  );
   this.updateScore();
   this.startTurn();
 };
@@ -153,14 +157,14 @@ Game.prototype.enableCuestick = function () {
 
 Game.prototype.gameOver = function () {
   this.disableCuestick();
-  this.cuestick.unbindKeys();
+  this.cuestick.unbindKeys(this.ctx.canvas);
   this.drawTable();
   this.gameOverCB(this.calculateWinner());
 };
 
 Game.prototype.gameLost = function () {
   this.disableCuestick();
-  this.cuestick.unbindKeys();
+  this.cuestick.unbindKeys(this.ctx.canvas);
   this.drawTable();
   this.gameLostCB(this.currentPlayer);
 };

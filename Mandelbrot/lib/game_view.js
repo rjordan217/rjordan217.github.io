@@ -31,8 +31,8 @@ GameView.prototype.launch = function() {
       this.dblTapped = this.dblTapped || false;
       if(this.dblTapped) {
         var rect = e.target.getBoundingClientRect();
-        e.offsetX = e.targetTouches[0].pageX - rect.left;
-        e.offsetY = e.targetTouches[0].pageY - rect.top;
+        e.offsetX = e.targetTouches[0].clientX - rect.left;
+        e.offsetY = e.targetTouches[0].clientY - rect.top;
         zoomIn.call(this,e);
         this.dblTapped = false;
       }

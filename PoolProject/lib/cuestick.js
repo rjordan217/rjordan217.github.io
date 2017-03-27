@@ -74,7 +74,7 @@ Cuestick.prototype.hoverBinder = function (renderCB, e) {
   }
 };
 
-Cuestick.prototype.bindKeys = function (renderCB, turnCB) {
+Cuestick.prototype.bindKeys = function (renderCB, turnCB, elToBind) {
   var self = this;
   if(window.isMobile) {
     this.touchstartListener = function(e){self.clickedBinder(renderCB,e.targetTouches[0])}
@@ -87,18 +87,23 @@ Cuestick.prototype.bindKeys = function (renderCB, turnCB) {
     this.mousemoveListener = this.hoverBinder.bind(this, renderCB);
     this.eNames = ['mousedown','mousemove','mouseup'];
   }
-  this.eNames.forEach(function(eName){
-    document.addEventListener(eName,this[eName + 'Listener'],true);
+  this.eNames.forEach(function(eName,idx){
+    if(idx == 0) {
+      elToBind.addEventListener(eName,this[eName + 'Listener'],true);
+    } else {
+      document.addEventListener(eName,this[eName + 'Listener'],true);
+    }
   }.bind(this))
 };
 
-Cuestick.prototype.unbindKeys = function () {
-  this.eventNames.forEach(function(eName){
-    document.removeEventListener(eName,this[eName + "Listener"],true);
+Cuestick.prototype.unbindKeys = function (elToUnbind) {
+  this.eNames.forEach(function(eName,idx){
+    if(idx == 0) {
+      elToUnbind.removeEventListener(eName,this[eName + 'Listener'],true);
+    } else {
+      document.removeEventListener(eName,this[eName + "Listener"],true);
+    }
   }.bind(this))
-  // document.removeEventListener("mousedown", this.mousedownListener, true);
-  // document.removeEventListener("mouseup", this.mouseupListener, true);
-  // document.removeEventListener("mousemove", this.mousemoveListener, true);
 };
 
 Cuestick.prototype.updateCueball = function (newCueball) {

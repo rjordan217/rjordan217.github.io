@@ -9,10 +9,13 @@
     <link href="https://fonts.googleapis.com/css?family=Philosopher:400,700,400italic" rel="stylesheet" type="text/css">
   </head>
   <body>
-    <header class="site-header">
-      <h1 class="name">
-        <a href="../index.html">Ryan<span class="accent-color">Jordan</span></a>
-      </h1>
+    <header class="site-header displayed">
+      <div class="menu-and-name">
+        <button id="menu-icon">◀</button>
+        <h1 class="name">
+          <a href="../index.html">Ryan<span class="accent-color">Jordan</span></a>
+        </h1>
+      </div>
 
       <div class="nav-content">
         <a href="../index.html#about" class="nav-item">About</a>
@@ -37,6 +40,8 @@
     <div class="pool-game">
       <canvas id="pool-canvas" width="1100" height="700"></canvas>
     </div>
+
     <script src="./bundle.js" charset="utf-8"></script>
+    <script src="../javascripts/handle_menu.js"></script>
   </body>
 </html>

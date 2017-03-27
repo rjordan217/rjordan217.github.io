@@ -394,8 +394,17 @@ footer {
   float: right;
 }
 
-@media only screen and (max-device-width: 480px) {
-  .splash-images {
-    height: calc(40vh - 56px);
+@media only screen and (max-width: 1000px) {
+  .splash-images {height: calc(40vh - 56px);}
+  #about {
+    flex-direction: column;
+    justify-content: center;
+  }
+  .about-pic {
+    margin: auto;
+    margin-bottom: 2em;
+  }
+  .about-pic img {
+    width: auto;
   }
 }
