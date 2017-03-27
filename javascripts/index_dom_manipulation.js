@@ -1,72 +1,68 @@
-// function removeOverlay() {
-//   var overlay = document.getElementsByClassName('overlay');
-//   var underConst = document.getElementsByClassName('under-construction');
-//   overlay[0].remove();
-//   underConst[0].remove();
-// }
-//
-// setTimeout(removeOverlay, 3000);
+window.isMobile = false;
+if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+    .test(navigator.userAgent)) window.isMobile = true;
 
+if(!window.isMobile) {
+  var optimizedResize = (function() {
 
-var optimizedResize = (function() {
+      var callbacks = [],
+          running = false;
 
-    var callbacks = [],
-        running = false;
+      // fired on resize event
+      function resize() {
 
-    // fired on resize event
-    function resize() {
+          if (!running) {
+              running = true;
 
-        if (!running) {
-            running = true;
+              if (window.requestAnimationFrame) {
+                  window.requestAnimationFrame(runCallbacks);
+              } else {
+                  setTimeout(runCallbacks, 66);
+              }
+          }
 
-            if (window.requestAnimationFrame) {
-                window.requestAnimationFrame(runCallbacks);
-            } else {
-                setTimeout(runCallbacks, 66);
-            }
-        }
+      }
 
-    }
+      // run the actual callbacks
+      function runCallbacks() {
 
-    // run the actual callbacks
-    function runCallbacks() {
+          callbacks.forEach(function(callback) {
+              callback();
+          });
 
-        callbacks.forEach(function(callback) {
-            callback();
-        });
+          running = false;
+      }
 
-        running = false;
-    }
+      // adds callback to loop
+      function addCallback(callback) {
 
-    // adds callback to loop
-    function addCallback(callback) {
+          if (callback) {
+              callbacks.push(callback);
+          }
 
-        if (callback) {
-            callbacks.push(callback);
-        }
+      }
 
-    }
+      return {
+          // public method to add additional callback
+          add: function(callback) {
+              if (!callbacks.length) {
+                  window.addEventListener('resize', resize);
+              }
+              addCallback(callback);
+          }
+      }
+  }());
 
-    return {
-        // public method to add additional callback
-        add: function(callback) {
-            if (!callbacks.length) {
-                window.addEventListener('resize', resize);
-            }
-            addCallback(callback);
-        }
-    }
-}());
-
-var aboutImg = document.getElementById('about-img');
-// start process
-optimizedResize.add(function() {
-    if (window.innerWidth <= 1100) {
-      if(aboutImg.src !== './res/insta.jpg') aboutImg.src = './res/insta.jpg';
-    } else {
-      if(aboutImg.src !== './res/marchetti.jpg') aboutImg.src = './res/marchetti.jpg';
-    }
-});
+  var aboutImg = document.getElementById('about-img');
+  // start process
+  optimizedResize.add(function() {
+      if (window.innerWidth <= 1100) {
+        if(aboutImg.src !== './res/insta.jpg') aboutImg.src = './res/insta.jpg';
+      } else {
+        if(aboutImg.src !== './res/marchetti.jpg') aboutImg.src = './res/marchetti.jpg';
+      }
+  });
+}
 
 var PROJECT_DESCRIPTIONS = [
   "<h2>Petsy</h2><hr>\
