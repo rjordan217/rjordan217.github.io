@@ -40,18 +40,6 @@ hr {
     border-width: 1px;
 }
 
-header {
-  position: fixed;
-  width: 100%;
-  padding: 5px 10px;
-  display: flex;
-  justify-content: space-between;
-  background-color: navy;
-  color: lightblue;
-  box-shadow: 0 2px 2px #47B0FF;
-  z-index: 9;
-}
-
 header .accent-color {
   color: #47B0FF;
 }
@@ -88,8 +76,61 @@ canvas {
   z-index: 10;
 }
 
+/* Nav-bar styling */
+
+.menu-and-name > * {
+  display: inline-block;
+  font-size: 2em;
+}
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: auto;
+  padding: 5px 10px;
+  font-family: 'Philosopher', sans-serif;
+  display: flex;
+  justify-content: space-between;
+  background-color: navy;
+  color: lightblue;
+  box-shadow: 0 2px 2px #47B0FF;
+  z-index: 9;
+}
+
+.site-header.displayed {
+  width: 100%;
+}
+
+.displayed #menu-icon {
+  font-size: 1.5em;
+}
+
+.displayed .name {
+  display: inline-block;
+}
+
+#menu-icon {
+  font-size: 2em;
+  color: #47B0FF;
+}
+
 .name {
+  display: none;
+  font-size: 2em;
+  font-weight: bold;
   cursor: pointer;
+}
+
+.displayed .nav-content {
+  display: flex;
+  margin-right: 10px;
+}
+
+.nav-content {
+  display: none;
+  justify-content: space-around;
+  z-index: 9;
 }
 
 .nav-item {
@@ -107,6 +148,8 @@ canvas {
   border-radius: 10px;
 }
 
+/* End nav-bar styling */
+
 .watermark {
   position: fixed;
   top: 35vh;
@@ -118,37 +161,28 @@ canvas {
 }
 
 .splash-images {
-  padding-top: 56px;
+  display: flex;
+  justify-content: space-between;
   width: 100vw;
-  height: calc(100vh - 56px);
+  height: 100vh;
   background-color: black;
 }
 
 .splash-images > div {
-  width: 46vw;
   height: 100%;
-  margin: 0 2vw;
+  flex: 1 1 46vw;
+  display: flex;
+  align-items: center;
 }
 
 .main-splash {
-  float: right;
-  display: flex;
-  align-items: center;
   background-image: url('../res/with_eyes_the_color_of_water.gif');
   background-repeat: repeat-y;
   background-size: 100% auto;
   opacity: .8;
 }
 
-.second-splash {
-  float: left;
-}
-
-.main-splash img {
-  width: 100%;
-}
-
-.second-splash img {
+.splash-images img {
   width: 100%;
 }
 
@@ -156,6 +190,10 @@ canvas {
   padding-top: 56px;
   text-align: center;
   font-size: 4em;
+}
+
+#drawing-canvas {
+  max-width: 100vw;
 }
 
 #logo {
@@ -166,13 +204,6 @@ canvas {
   background-size: 100% 100%;
   width: 31.5vh;
   height: 30vh;
-}
-
-.nav-content {
-  display: flex;
-  justify-content: space-around;
-  margin-right: 10px;
-  z-index: 9;
 }
 
 .main {
@@ -382,20 +413,14 @@ footer {
   background-image: url('../res/github-no-bg.png');
 }
 
-.left {
-  margin-left: 0;
-  margin-right: auto;
-  float: left;
-}
-
-.right {
-  margin-right: 0;
-  margin-left: auto;
-  float: right;
-}
-
-@media only screen and (max-width: 1000px) {
-  .splash-images {height: calc(40vh - 56px);}
+@media only screen and (max-width: 800px) {
+  body {
+    max-width: 100vw;
+    font-size: medium;
+  }
+  .welcome {
+    font-size: 2em;
+  }
   #about {
     flex-direction: column;
     justify-content: center;
@@ -406,5 +431,12 @@ footer {
   }
   .about-pic img {
     width: auto;
+    max-width: 100vw;
   }
+}
+
+@media only screen and (max-width: 800px) and (orientation: portrait) {
+  .site-header{display: block;}
+  .name{float: left;}
+  .nav-content{float: right;}
 }

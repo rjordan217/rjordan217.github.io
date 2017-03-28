@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Ryan Jordan - Software Dev and Polyglot</title>
     <link rel="stylesheet" href="./stylesheets/index_style.css" charset="utf-8">
     <link rel="icon" href="./res/personal_logo.ico" type="image/gif" sizes="32x32">
@@ -37,8 +38,13 @@
       <div id="logo"></div>
     </div>
 
-    <header class="site-header">
-      <h1 class="name" onclick="scroll(0,0)">Ryan<span class="accent-color">Jordan</span></h1>
+    <header class="site-header displayed">
+      <div class="menu-and-name">
+        <button id="menu-icon">◀</button>
+        <h1 class="name" onclick="scroll(0,0)">
+          Ryan<span class="accent-color">Jordan</span>
+        </h1>
+      </div>
 
       <div class="nav-content">
         <a href="#about" class="nav-item">About</a>
@@ -62,21 +68,21 @@
 
     <div class="main">
       <div class="splash-images">
-        <div class="main-splash">
-          <img src="./res/les_yeux_.jpg">
-        </div>
         <div class="second-splash">
           <section class="contenedor">
+            <span class="left">“</span>
             <div class="three-deify">
-              <span class="left">“</span>
               <figure>Dynamic...</figure>
               <figure>Creative...</figure>
               <figure>Clever...</figure>
               <figure>Perceptive...</figure>
               <figure>Inspired...</figure>
-              <span class="right">”</span>
             </div>
+            <span class="right">”</span>
           </section>
+        </div>
+        <div class="main-splash">
+          <img src="./res/les_yeux_.jpg">
         </div>
       </div>
       <div class="welcome">
@@ -158,5 +164,6 @@
     <script src="./javascripts/jquery-1.12.3.min.js" charset="utf-8"></script>
     <script src="./javascripts/index_dom_manipulation.js" charset="utf-8"></script>
     <script src="./javascripts/calligraphy_demo_bundle.js" charset="utf-8"></script>
+    <script src="./javascripts/handle_menu.js" charset="utf-8"></script>
   </body>
 </html>

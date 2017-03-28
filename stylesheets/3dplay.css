@@ -1,21 +1,32 @@
 .contenedor {
-  width: 400px;
-  height: 400px;
-  margin: 200px auto 0;
+  width: 100%;
+  height: 5em;
   position: relative;
+  font-size: 2em;
+  color: white;
   -webkit-perspective: 2000px;
      -moz-perspective: 2000px;
        -o-perspective: 2000px;
           perspective: 2000px;
 }
 
+.contenedor > * {
+  position: absolute;
+}
+
+.left {
+  top: 0;
+  left: 2%;
+}
+
+.right {
+  bottom: 0;
+  right: 2%;
+}
+
 .three-deify {
   width: 100%;
   height: 100%;
-  color: white;
-  position: absolute;
-  top: -100px;
-  font-size: 50px;
   -webkit-transform: translateZ( -200px );
      -moz-transform: translateZ( -200px );
        -o-transform: translateZ( -200px );
@@ -30,85 +41,74 @@
           transition: transform 5s linear;
 }
 
-.three-deify .left {
-  position: absolute;
-  top: 75px;
-  left: -35px;
-}
-
-.three-deify .right {
-  position: absolute;
-  right: 35px;
-  bottom: 100px;
-}
-
-figure {
-  width: 250px;
-  height: 100px;
+.three-deify figure {
   display: block;
   position: absolute;
-  top: 100px;
+  margin: 0;
+  top: 1.5em;
+  width: 100%;
+  text-align: center;
   transition: transform 3s linear;
   font-style: italic;
   backface-visibility: hidden;
 }
 
-figure:nth-child(2) {
+figure:nth-child(1) {
   -webkit-transform: rotateX(0deg) translateZ(200px);
      -moz-transform: rotateX(0deg) translateZ(200px);
        -o-transform: rotateX(0deg) translateZ(200px);
           transform: rotateX(0deg) translateZ(200px);
 }
-figure:nth-child(3) {
+figure:nth-child(2) {
   -webkit-transform: rotateX(-72deg) translateZ(200px);
      -moz-transform: rotateX(-72deg) translateZ(200px);
        -o-transform: rotateX(-72deg) translateZ(200px);
           transform: rotateX(-72deg) translateZ(200px);
 }
-figure:nth-child(4) {
+figure:nth-child(3) {
   -webkit-transform: rotateX(-144deg) translateZ(200px);
      -moz-transform: rotateX(-144deg) translateZ(200px);
        -o-transform: rotateX(-144deg) translateZ(200px);
           transform: rotateX(-144deg) translateZ(200px);
 }
-figure:nth-child(5) {
+figure:nth-child(4) {
   -webkit-transform: rotateX(-216deg) translateZ(200px);
      -moz-transform: rotateX(-216deg) translateZ(200px);
        -o-transform: rotateX(-216deg) translateZ(200px);
           transform: rotateX(-216deg) translateZ(200px);
 }
-figure:nth-child(6) {
+figure:nth-child(5) {
   -webkit-transform: rotateX(-288deg) translateZ(200px);
      -moz-transform: rotateX(-288deg) translateZ(200px);
        -o-transform: rotateX(-288deg) translateZ(200px);
           transform: rotateX(-288deg) translateZ(200px);
 }
 
-.three-deify:hover figure:nth-child(6) {
+.three-deify:hover figure:nth-child(5) {
   -webkit-transform: rotateX(0deg) translateZ(200px);
      -moz-transform: rotateX(0deg) translateZ(200px);
        -o-transform: rotateX(0deg) translateZ(200px);
           transform: rotateX(0deg) translateZ(200px);
 }
-.three-deify:hover figure:nth-child(2) {
+.three-deify:hover figure:nth-child(1) {
   -webkit-transform: rotateX(288deg) translateZ(200px);
      -moz-transform: rotateX(288deg) translateZ(200px);
        -o-transform: rotateX(288deg) translateZ(200px);
           transform: rotateX(288deg) translateZ(200px);
 }
-.three-deify:hover figure:nth-child(3) {
+.three-deify:hover figure:nth-child(2) {
   -webkit-transform: rotateX(216deg) translateZ(200px);
      -moz-transform: rotateX(216deg) translateZ(200px);
        -o-transform: rotateX(216deg) translateZ(200px);
           transform: rotateX(216deg) translateZ(200px);
 }
-.three-deify:hover figure:nth-child(4) {
+.three-deify:hover figure:nth-child(3) {
   -webkit-transform: rotateX(144deg) translateZ(200px);
      -moz-transform: rotateX(144deg) translateZ(200px);
        -o-transform: rotateX(144deg) translateZ(200px);
           transform: rotateX(144deg) translateZ(200px);
 }
-.three-deify:hover figure:nth-child(5) {
+.three-deify:hover figure:nth-child(4) {
   -webkit-transform: rotateX(72deg) translateZ(200px);
      -moz-transform: rotateX(72deg) translateZ(200px);
        -o-transform: rotateX(72deg) translateZ(200px);
