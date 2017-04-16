@@ -123,7 +123,7 @@ class that would only evaluate SQL queries when absolutely necessary. \
 Optimizations such as this reduce bottlenecks in the server request/response \
 cycle and are crucial for high-quality production-level web servers. I hope to \
 work on similar backend projects in the future!</p>",
-  "<h2>JavaScript Calligrapher (In Progress)</h2><hr>\
+  "<h2>JavaScript Calligrapher</h2><hr>\
 <p>My JavaScript Calligrapher is a pet project that I hope to expand into \
 a full-fledged language-learning app. This tool is meant to take away one of \
 the many challenges I have faced in trying to learn languages on my own: <strong>\
@@ -139,7 +139,7 @@ to the excitement and satisfaction I feel when learning a new language and using
 it to connect with diverse people with very different experiences than my own. \
 This is a feeling that I want to share with the whole world, and I know it can \
 make this world a better, more understanding place!</p>",
-  "<h2>Mandelbrot Visualizer (In Progress)</h2><hr>\
+  "<h2>Mandelbrot Visualizer</h2><hr>\
 <p>The Mandelbrot generator is a project I would like to dedicate to all my fellow \
 math enthusiasts out there. Even non-mathematically inclined people must marvel at the \
 beauty of this amazing fractal set. The definition of the Mandelbrot is actually \

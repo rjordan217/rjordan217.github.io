@@ -3,7 +3,7 @@
 /PoolProject/lib/phased_out_code.js
 web_content
 web_editor_plan.txt
-.gitignore
 /node_modules
+/html
 package.json
 webpack.config.js
