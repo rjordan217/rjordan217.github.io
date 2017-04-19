@@ -154,7 +154,38 @@ in 30 minutes. After this, I took a bit of time to optimize the render speed by 
 hard-coding in the main cardioid and disc portions of the image, since the rendering \
 function takes longest to loop through its calculations on pixels inside the \
 Mandelbrot. The next most immediate features I hope to add to this project are \
-zoom functionality and a Julia set generator in a side-window.</p>"
+zoom functionality and a Julia set generator in a side-window.</p>",
+  "<h2>RedditReactive</h2><hr>\
+<p>RedditReactive supplies its users with an easy way to see the hottest posts on Reddit, \
+search and view posts and subreddits, and subscribe/unsubscribe from subreddits. Due to \
+the requirements of the Reddit API, a user can only see the hottest new links on Reddit \
+before logging in; however, the full functionality listed above is available once the \
+user logs in and gives the app permission to manage his or her account. Mobile-specific \
+functionality is also fairly minimal, but includes the ability to collapse the top- and \
+sidebars.</p><p>The application relies on the Reddit API to serve content. The \
+simplest call to get the trending links on Reddit's main page can be made without \
+user authentication, but all additional functionality requires the user to give \
+RedditReactive account permissions. Reddit will then verify the user and, assuming \
+the user gives the app permissions, redirect back to the application with an OAuth2 \
+token encoded in the query string of the URL. Once the application is updated with \
+the user's token, the Redux store triggers the application to fetch the username \
+and the user's subreddit subscriptions. Once the response is parsed, the results \
+are displayed in their corresponding ReactDOM components. Most of these components \
+are fitted with infinite scroll functionality. I chose to build this application \
+with the Redux architecture, which is a paradigm for maintaining all application \
+state in a single store. This helps avoid race conditions and makes for stricter \
+management of application state and event dispatching. While race conditions \
+were not a major concern at such an early stage of development, should I \
+choose to expand the application, this could become a major boon when keeping track of \
+a more significant state load.</p><p>There is a lot that could be added and improved on \
+in this application, so if you have any ideas, please feel free to reach out and help me \
+improve this project! It was developed as part of a coding challenge, but I genuinely \
+enjoyed the experience and would love to add some functionality and rework any features \
+necessary to optimize UX. Some of the lowest hanging fruit that I could add is voting \
+capabilities so that users may vote up or vote down a post. A nice, clean interface to \
+add comments and scroll through replies would also be very nice, and another good area \
+to differentiate this application from the somewhat aesthetically lacking Reddit UI. \
+Let me know anything else you would like to see!</p>"
 ];
 
 var projAnchor = document.getElementById('proj-desc-anchor');
