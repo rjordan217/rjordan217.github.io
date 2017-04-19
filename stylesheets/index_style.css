@@ -320,6 +320,10 @@ p {
   background: url('../res/mandelbrot.png');
 }
 
+.reddit {
+  background: url('../res/reddit.png')
+}
+
 .project {
   margin: 1em;
   background-size: 100% auto;
